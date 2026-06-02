@@ -26,7 +26,7 @@ export default async function Home() {
                 Ver el catálogo
               </Link>
               <a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '5213312345678'}`}
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '5213331292868'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-line px-6 py-3 text-ink transition-colors hover:border-ink"

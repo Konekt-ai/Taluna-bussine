@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted">Sin imagen</div>
+          <div className="flex h-full items-center justify-center text-sm text-muted">Foto próximamente</div>
         )}
         {soldOut && (
           <span className="absolute left-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-xs text-cream">

@@ -24,7 +24,7 @@ export default async function ProductPage({ params }) {
   if (!product) notFound();
 
   const img = product.images?.[0]?.url;
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP || '5213312345678';
+  const phone = process.env.NEXT_PUBLIC_WHATSAPP || '5213331292868';
   const waMessage = `Hola Taluna, me interesa la "${product.name}" (${formatPrice(
     product.price,
     product.currency
@@ -51,7 +51,7 @@ export default async function ProductPage({ params }) {
               priority
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-muted">Sin imagen</div>
+            <div className="flex h-full items-center justify-center text-muted">Foto próximamente</div>
           )}
         </div>
 
