@@ -2,6 +2,7 @@ import './globals.css';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { CartProvider } from '@/components/CartContext';
 
 export const metadata = {
   title: 'Taluna · Bolsas artesanales hechas en México',
@@ -24,10 +25,12 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <Nav />
-        <main className="min-h-[60vh]">{children}</main>
-        <Footer />
-        <WhatsAppButton />
+        <CartProvider>
+          <Nav />
+          <main className="min-h-[60vh]">{children}</main>
+          <Footer />
+          <WhatsAppButton />
+        </CartProvider>
       </body>
     </html>
   );

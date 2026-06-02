@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProductBySlug, getProducts, formatPrice } from '@/lib/products';
+import AddToCartButton from '@/components/AddToCartButton';
 
 // Genera las rutas estáticas de cada producto (mejor SEO + velocidad).
 export async function generateStaticParams() {
@@ -85,16 +86,17 @@ export default async function ProductPage({ params }) {
             </div>
           )}
 
-          {/* CTA WhatsApp */}
+          {/* CTA: agregar al carrito */}
+          <AddToCartButton product={product} soldOut={soldOut} />
+
+          {/* Alternativa: comprar directo por WhatsApp */}
           <a
             href={waHref}
             target="_blank"
             rel="noopener noreferrer"
-            className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-6 py-4 text-center text-cream transition-colors sm:w-auto ${
-              soldOut ? 'bg-muted' : 'bg-wine hover:bg-wineSoft'
-            }`}
+            className="mt-3 inline-block text-sm text-muted underline-offset-4 hover:text-ink hover:underline"
           >
-            {soldOut ? 'Avísame cuando llegue' : 'Comprar por WhatsApp'}
+            {soldOut ? 'Avísame cuando llegue por WhatsApp' : 'o cómpralo directo por WhatsApp'}
           </a>
 
           {/* Detalles */}
