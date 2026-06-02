@@ -148,11 +148,16 @@ join (values
 where p.slug = 'strap-chaquira';
 
 -- ---------------------------------------------------------------------
--- IMÁGENES
---  Cuando subas las fotos reales a Supabase Storage (bucket "productos"),
---  pega aquí cada URL pública. Ejemplo:
---
---  insert into product_images (product_id, url, alt, position)
---  select id, 'https://TU-PROYECTO.supabase.co/storage/v1/object/public/productos/tauu.jpg', 'Bolsa Tauú', 0
---  from products where slug = 'bolsa-tauu';
+-- IMÁGENES (fotos reales subidas a Supabase Storage, bucket "productos")
 -- ---------------------------------------------------------------------
+insert into product_images (product_id, url, alt, position)
+select p.id, img.url, p.name, 0
+from products p
+join (values
+  ('bolsa-tauu',     'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/Tauu.jpeg'),
+  ('bolsa-maraica',  'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/MARAICA.jpeg'),
+  ('bolsa-tacana',   'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/Tacana.jpeg'),
+  ('bolsa-luna',     'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/Luna.jpeg'),
+  ('strap-tejido',   'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/STRAPS%20%20TEJIDOS.jpeg'),
+  ('strap-chaquira', 'https://zvtwqwxycyrjwfxamgqn.supabase.co/storage/v1/object/public/productos/STRAPS%20CHAQUIRA.jpeg')
+) as img(slug, url) on img.slug = p.slug;
