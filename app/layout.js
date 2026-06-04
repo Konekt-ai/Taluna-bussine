@@ -2,6 +2,7 @@ import './globals.css';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ScrollReveal from '@/components/ScrollReveal';
 import { CartProvider } from '@/components/CartContext';
 
 export const metadata = {
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
           <main className="min-h-[60vh]">{children}</main>
           <Footer />
           <WhatsAppButton />
+          <ScrollReveal />
         </CartProvider>
       </body>
     </html>

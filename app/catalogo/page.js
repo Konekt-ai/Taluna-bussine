@@ -10,11 +10,15 @@ export default async function CatalogoPage() {
   const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
-    <div className="shell py-12">
+    <div className="wrap section--tight">
       <header className="mb-10">
-        <span className="text-sm uppercase tracking-[0.2em] text-wine">Catálogo</span>
-        <h1 className="mt-2 font-display text-4xl text-ink">Todas las bolsas</h1>
-        <p className="mt-2 text-muted">{products.length} piezas disponibles.</p>
+        <span className="eyebrow">Catálogo</span>
+        <h1 className="sec-title" style={{ marginTop: 12 }}>
+          Toda la <em>colección.</em>
+        </h1>
+        <p className="lead" style={{ marginTop: 12 }}>
+          {products.length} piezas hechas a mano, listas para enviar.
+        </p>
       </header>
       <CatalogGrid products={products} categories={categories} />
     </div>
