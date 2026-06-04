@@ -5,19 +5,10 @@ import ProductCard from '@/components/ProductCard';
 import HomeEffects from '@/components/HomeEffects';
 
 const ASSET = {
-  heroVideo: '/design/taluna-bag.mp4',
-  heroPoster: '/design/taluna-bag-poster.jpg',
+  heroVideo: '/design/taluna-hero-bag.mp4',
+  heroPoster: '/design/taluna-hero-bag-poster.jpg',
   craft: '/design/craft-straps.jpg',
 };
-
-const MARQUEE = [
-  'Envíos a todo México',
-  'Hecho a mano',
-  '100% piel',
-  'Pedidos personalizados',
-  'Straps tejidos y chaquira',
-  'Artesanía mexicana',
-];
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -38,7 +29,6 @@ export default async function Home() {
   // Portada por categoría: primera foto real de un producto de esa categoría.
   const coverFor = (slug) =>
     products.find((p) => p.category_slug === slug && p.images?.[0]?.url)?.images?.[0]?.url || null;
-  const countFor = (slug) => products.filter((p) => p.category_slug === slug).length;
 
   // Fotos reales para la comunidad (Instagram); si faltan, usamos el asset artesanal.
   const productImgs = products.map((p) => p.images?.[0]?.url).filter(Boolean);
@@ -102,11 +92,10 @@ export default async function Home() {
               >
                 <source src={ASSET.heroVideo} type="video/mp4" />
               </video>
-              <div className="hero__media-veil" />
             </div>
             {heroFeat && (
               <p className="hero__cap">
-                <b>{heroFeat.name}</b> · 100% piel · desde{' '}
+                <b>{heroFeat.name}</b> · piel y chaquira · desde{' '}
                 {formatPrice(heroFeat.price, heroFeat.currency)}
               </p>
             )}
@@ -114,19 +103,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ===== STRIP ===== */}
-      <div className="strip" aria-hidden="true">
-        <div className="strip__track">
-          {[...MARQUEE, ...MARQUEE].map((t, i) => (
-            <span className="strip__item" key={i}>
-              <span className="s" />
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ===================== CRAFT — momento editorial ===================== */}
+      {/* ===================== CRAFT — momento editorial (liquid glass) ===================== */}
       <section className="craft reveal">
         <img
           className="craft__img"
@@ -136,22 +113,29 @@ export default async function Home() {
         />
         <div className="craft__scrim" />
         <div className="wrap craft__inner">
-          <span className="craft__eyebrow eyebrow">Hecho a mano en México</span>
-          <h2 className="craft__title">
-            Detalles que cuentan <em>una historia.</em>
-          </h2>
-          <p className="craft__p">
-            Chaquira, piel y tradición artesanal. Cada strap se teje cuenta por cuenta y se monta
-            sobre piel genuina con herrajes de latón.
-          </p>
-          <div className="craft__chips">
-            <span className="craft__chip"><span className="d" style={{ background: '#3CC6C0' }} />Chaquira tejida</span>
-            <span className="craft__chip"><span className="d" style={{ background: '#C7A079' }} />Piel genuina</span>
-            <span className="craft__chip"><span className="d" style={{ background: '#E0A84E' }} />Latón macizo</span>
+          <div className="craft__panel liquid-glass-strong">
+            <span className="craft__eyebrow">Hecho a mano en México</span>
+            <h2 className="craft__title">
+              Detalles que cuentan <em>una historia.</em>
+            </h2>
+            <p className="craft__p">
+              Chaquira, piel y tradición artesanal. Cada strap se teje cuenta por cuenta y se monta
+              sobre piel genuina con herrajes de latón macizo.
+            </p>
+            <div className="craft__chips">
+              <span className="craft__chip liquid-glass">Chaquira tejida</span>
+              <span className="craft__chip liquid-glass">Piel genuina</span>
+              <span className="craft__chip liquid-glass">Latón macizo</span>
+            </div>
+            <Link className="craft__cta liquid-glass-strong" href="/catalogo">
+              <span className="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              Descubrir los straps
+            </Link>
           </div>
-          <Link className="btn btn--light" href="/catalogo">
-            Descubrir los straps {arrow}
-          </Link>
         </div>
       </section>
 
@@ -162,32 +146,32 @@ export default async function Home() {
             <div className="reveal">
               <span className="eyebrow">Explora por categoría</span>
               <h2 className="sec-title" style={{ marginTop: 14 }}>
-                Para cada<br /><em>ocasión.</em>
+                Compra por<br /><em>colección.</em>
               </h2>
             </div>
             <Link className="btn btn--ghost reveal" href="/catalogo">
               Ver todo el catálogo {arrow}
             </Link>
           </div>
-          <div className="cats">
+          <div className="collections reveal">
             {categories.map((c, i) => {
               const cover = coverFor(c.slug);
+              // Bento: la primera categoría es el tile protagonista, la segunda ancho.
+              const sizeClass = i === 0 ? ' col-tile--xl' : i === 1 ? ' col-tile--wide' : '';
               return (
-                <Link className="cat reveal" data-d={String(i)} href="/catalogo" key={c.slug}>
+                <Link className={`col-tile${sizeClass}`} href="/catalogo" key={c.slug}>
                   {cover ? (
-                    <img className="cat__img" src={cover} alt={c.name} loading="lazy" />
+                    <img className="col-tile__img" src={cover} alt={c.name} loading="lazy" />
                   ) : (
-                    <div className="imgph">{c.name}</div>
+                    <div className="col-tile__ph imgph">{c.name}</div>
                   )}
-                  <div className="cat__overlay" />
-                  <div className="cat__body">
-                    <div>
-                      <div className="cat__name">{c.name}</div>
-                      <div className="cat__count">{countFor(c.slug)} piezas</div>
-                    </div>
-                    <span className="cat__arrow">
+                  <div className="col-tile__overlay" />
+                  <div className="col-tile__body">
+                    <div className="col-tile__name">{c.name}</div>
+                    <span className="col-tile__cta">
+                      {i === 0 ? 'Ver colección' : 'Explorar'}
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M7 17 17 7M9 7h8v8" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                   </div>

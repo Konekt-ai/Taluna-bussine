@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="footer__grid">
           <div>
-            <div className="footer__word">Taluna</div>
+            <img className="footer__logo" src="/logo-taluna-light.png" alt="Taluna MX" />
             <p style={{ maxWidth: '36ch', marginTop: 14, color: 'rgba(235,225,209,.6)', fontSize: '.95rem' }}>
               Bolsas y straps 100% de piel, hechos a mano por artesanas mexicanas. Cada pieza,
               una obra de arte.

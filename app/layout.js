@@ -9,6 +9,7 @@ export const metadata = {
   title: 'Taluna · Bolsas artesanales hechas en México',
   description:
     'Bolsas artesanales premium. Cada pieza, hecha a mano. Descubre el catálogo Taluna.',
+  icons: { icon: '/favicon.png' },
 };
 
 export default function RootLayout({ children }) {
@@ -21,7 +22,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@1,8..60,400;1,8..60,500&display=swap"
           rel="stylesheet"
         />
       </head>

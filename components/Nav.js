@@ -39,8 +39,7 @@ export default function Nav() {
       <header className={`nav${scrolled ? ' scrolled' : ''}`} id="nav">
         <div className="wrap nav__in">
           <Link className="brand" href="/" aria-label="Taluna MX inicio">
-            <span className="brand__mark">Taluna</span>
-            <span className="brand__mx">MX</span>
+            <img className="brand__logo" src="/logo-taluna-dark.png" alt="Taluna MX" />
           </Link>
 
           <nav className="nav__links">
@@ -104,8 +103,7 @@ export default function Nav() {
         <div className="sheet__panel">
           <div className="sheet__head">
             <Link className="brand" href="/">
-              <span className="brand__mark">Taluna</span>
-              <span className="brand__mx">MX</span>
+              <img className="sheet__logo" src="/logo-taluna-dark.png" alt="Taluna MX" />
             </Link>
             <button className="icon-btn" aria-label="Cerrar" onClick={() => setOpen(false)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
