@@ -24,7 +24,43 @@ Abre http://localhost:3000 — ya verás la tienda con productos de ejemplo.
 
 ---
 
-## 2. Crear la base de datos (Supabase) — gratis
+## 2. ¿De dónde salen los productos y las fotos?
+
+Del **Organizador** (repo `Tanuna-organizador`), el panel que Taluna usa desde el
+celular: ahí da de alta bolsas, straps y cinturones y sube las fotos (bucket
+`studio` de Supabase). Esta tienda lee ese mismo catálogo, así que **lo que se
+guarda en el Organizador aparece aquí solo**, sin volver a desplegar y sin tocar
+SQL. Tarda menos de un minuto.
+
+**Qué se publica:** lo que tiene *nombre*, *precio* y estado *Activa/Activo* o
+*Agotada/Agotado*. Lo oculto y lo marcado "Próximamente" no sale; los borradores
+sin precio tampoco. En el Organizador, la pantalla **Tu tienda en vivo** dice
+exactamente qué se está mostrando, qué no y por qué.
+
+### Encenderlo (una sola vez)
+
+1. Supabase → **SQL Editor → New query** → pega todo `supabase/studio-catalog.sql`
+   y dale **Run**.
+2. Eso crea la vista `studio_catalog` (solo campos públicos: las notas internas y
+   el SKU nunca salen) y **apaga** el catálogo viejo de la demo, cuyas fotos
+   vivían en el bucket `productos` que solo era de prueba.
+
+Si esa vista no existe o falla, la tienda usa como respaldo el catálogo viejo en
+tablas: nunca se queda en blanco.
+
+### Que el cambio se vea al instante (opcional)
+
+Sin esto la tienda ya se refresca sola cada 60 segundos. Para que salga en el
+momento exacto en que la dueña guarda:
+
+1. En la tienda (Vercel → Environment Variables): `REVALIDATE_SECRET` con una
+   contraseña larga inventada.
+2. En el Organizador: `STORE_REVALIDATE_URL=https://TU-TIENDA/api/revalidate` y
+   `STORE_REVALIDATE_SECRET` con **el mismo** valor.
+
+---
+
+## 3. Crear la base de datos (Supabase) — gratis
 
 1. Entra a https://supabase.com y crea cuenta (gratis).
 2. **New project** → ponle nombre (ej. `taluna`) y una contraseña de base de datos.
@@ -49,13 +85,13 @@ Reinicia `npm run dev`. Ahora los productos vienen de tu base de datos real.
 
 ### Subir fotos de productos
 
-En Supabase → **Storage** → crea un bucket llamado `productos` y márcalo como **público**.
-Sube las fotos, copia la URL pública de cada una y pégala en la tabla `product_images`
-(o desde el panel **Table Editor**).
+Ya no se hace aquí: las sube Taluna desde el **Organizador** y se guardan en el
+bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
+`products` / `product_images` quedan solo como respaldo histórico.
 
 ---
 
-## 3. Publicar la web (Vercel) — gratis
+## 4. Publicar la web (Vercel) — gratis
 
 1. Sube este proyecto a un repo de GitHub.
 2. Entra a https://vercel.com, **Add New → Project**, importa el repo.
@@ -64,7 +100,7 @@ Sube las fotos, copia la URL pública de cada una y pégala en la tabla `product
 
 ---
 
-## 4. Dominio gratis (DigitalPlat FreeDomain)
+## 5. Dominio gratis (DigitalPlat FreeDomain)
 
 1. Entra a https://domain.digitalplat.org y registra tu dominio gratis (ej. `taluna.dpdns.org` o un TLD gratuito).
 2. En Vercel: tu proyecto → **Settings → Domains** → agrega tu dominio.
@@ -73,7 +109,7 @@ Sube las fotos, copia la URL pública de cada una y pégala en la tabla `product
 
 ---
 
-## 5. ¿Dónde toca cada cosa?
+## 6. ¿Dónde toca cada cosa?
 
 | Quiero cambiar...            | Archivo |
 |------------------------------|---------|
@@ -81,6 +117,8 @@ Sube las fotos, copia la URL pública de cada una y pégala en la tabla `product
 | Tipografías                  | `app/layout.js` (link de fuentes) + `app/globals.css` |
 | Textos del home              | `app/page.js` |
 | Estructura de la base datos  | `supabase/schema.sql` |
+| Qué se publica y cómo se ve el catálogo del Organizador | `supabase/studio-catalog.sql` y `lib/studio.js` |
+| Cada cuánto se refresca el catálogo | `CATALOG_REVALIDATE` en `lib/supabase.js` y el `export const revalidate` de cada página |
 | Productos de ejemplo         | `supabase/seed.sql` y `lib/sample-data.js` |
 | Número de WhatsApp           | variable `NEXT_PUBLIC_WHATSAPP` |
 
@@ -95,20 +133,23 @@ app/
   catalogo/page.js       Catálogo con filtros
   producto/[slug]/page.js Ficha de producto
 components/              Nav, Footer, ProductCard, CatalogGrid, WhatsAppButton
+  api/revalidate/route.js  Refresco inmediato que dispara el Organizador
 lib/
   supabase.js            Cliente de Supabase
-  products.js            Lectura de datos (con fallback a ejemplo)
+  studio.js              Catálogo del Organizador -> productos de la tienda
+  products.js            Lectura de datos (Organizador -> tablas -> ejemplo)
   sample-data.js         Datos de ejemplo
 supabase/
   schema.sql             Esquema de la base de datos
   seed.sql               Datos de ejemplo
+  studio-catalog.sql     Vista pública del catálogo del Organizador
 ```
 
 ---
 
 ## Roadmap (siguiente, según la propuesta Konekt)
 
-- [ ] Panel admin para que Taluna edite catálogo sin tocar SQL
+- [x] Panel admin para que Taluna edite catálogo sin tocar SQL (repo `Tanuna-organizador`)
 - [ ] Instagram Shopping (feed Meta desde el mismo catálogo)
 - [ ] Carrito + checkout
 - [ ] CRM básico (leads desde WhatsApp) y automatizaciones

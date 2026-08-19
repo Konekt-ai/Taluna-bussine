@@ -1,6 +1,10 @@
 import { getProducts, getCategories } from '@/lib/products';
 import CatalogGrid from '@/components/CatalogGrid';
 
+// El catálogo se refresca solo cada minuto (lo que la dueña guarda
+// en el Organizador aparece aquí sin volver a desplegar).
+export const revalidate = 60;
+
 export const metadata = {
   title: 'Catálogo · Taluna',
   description: 'Explora todas nuestras bolsas artesanales.',

@@ -45,7 +45,9 @@ export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
 
   const img = product.images?.[0]?.url;
-  const soldOut = product.total_stock === 0;
+  // El Organizador marca el estado ("Agotada"); el catálogo viejo solo
+  // tenía inventario. total_stock null = no se lleva inventario de esa pieza.
+  const soldOut = product.sold_out ?? product.total_stock === 0;
   const lowStock = product.total_stock > 0 && product.total_stock <= 3;
   const swatches = swatchesFor(product);
 

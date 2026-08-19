@@ -4,6 +4,10 @@ import { notFound } from 'next/navigation';
 import { getProductBySlug, getProducts, formatPrice } from '@/lib/products';
 import AddToCartButton from '@/components/AddToCartButton';
 
+// El catálogo se refresca solo cada minuto (lo que la dueña guarda
+// en el Organizador aparece aquí sin volver a desplegar).
+export const revalidate = 60;
+
 // Genera las rutas estáticas de cada producto (mejor SEO + velocidad).
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -30,7 +34,16 @@ export default async function ProductPage({ params }) {
     product.currency
   )}). ¿Sigue disponible?`;
   const waHref = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
-  const soldOut = product.total_stock === 0;
+  const soldOut = product.sold_out ?? product.total_stock === 0;
+
+  // Detalles de la ficha: los que trae el Organizador (color, tamaño,
+  // medidas, herrajes…) o, si viene del catálogo viejo, los de siempre.
+  const details = product.details?.length
+    ? product.details
+    : [
+        { label: 'Materiales', value: product.materials },
+        { label: 'Medidas', value: product.dimensions },
+      ].filter((d) => d.value);
 
   return (
     <div className="shell py-10">
@@ -100,20 +113,16 @@ export default async function ProductPage({ params }) {
           </a>
 
           {/* Detalles */}
-          <dl className="mt-10 divide-y divide-line border-t border-line text-sm">
-            {product.materials && (
-              <div className="flex justify-between py-3">
-                <dt className="text-muted">Materiales</dt>
-                <dd className="max-w-[60%] text-right text-ink">{product.materials}</dd>
-              </div>
-            )}
-            {product.dimensions && (
-              <div className="flex justify-between py-3">
-                <dt className="text-muted">Medidas</dt>
-                <dd className="text-ink">{product.dimensions}</dd>
-              </div>
-            )}
-          </dl>
+          {details.length > 0 && (
+            <dl className="mt-10 divide-y divide-line border-t border-line text-sm">
+              {details.map((d) => (
+                <div key={d.label} className="flex justify-between py-3">
+                  <dt className="text-muted">{d.label}</dt>
+                  <dd className="max-w-[60%] text-right text-ink">{d.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
       </div>
     </div>

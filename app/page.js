@@ -4,6 +4,10 @@ import { site } from '@/lib/site';
 import ProductCard from '@/components/ProductCard';
 import HomeEffects from '@/components/HomeEffects';
 
+// El catálogo se refresca solo cada minuto (lo que la dueña guarda
+// en el Organizador aparece aquí sin volver a desplegar).
+export const revalidate = 60;
+
 const ASSET = {
   heroVideo: '/design/taluna-hero-bag.mp4',
   heroPoster: '/design/taluna-hero-bag-poster.jpg',
