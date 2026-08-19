@@ -1,5 +1,7 @@
 import { getProducts, getCategories } from '@/lib/products';
+import { getSiteContent } from '@/lib/site-content';
 import CatalogGrid from '@/components/CatalogGrid';
+import RichText from '@/components/blocks/RichText';
 
 // El catálogo se refresca solo cada minuto (lo que la dueña guarda
 // en el Organizador aparece aquí sin volver a desplegar).
@@ -11,18 +13,28 @@ export const metadata = {
 };
 
 export default async function CatalogoPage() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const [products, categories, content] = await Promise.all([
+    getProducts(),
+    getCategories(),
+    getSiteContent(),
+  ]);
+
+  // El encabezado lo edita la dueña; {piezas} se cambia por el número real.
+  const { eyebrow, title, lead } = content.catalogo;
+  const leadText = String(lead || '').replace(/\{piezas\}/g, products.length);
 
   return (
     <div className="wrap section--tight">
       <header className="mb-10">
-        <span className="eyebrow">Catálogo</span>
+        {eyebrow && <span className="eyebrow">{eyebrow}</span>}
         <h1 className="sec-title" style={{ marginTop: 12 }}>
-          Toda la <em>colección.</em>
+          <RichText text={title} />
         </h1>
-        <p className="lead" style={{ marginTop: 12 }}>
-          {products.length} piezas hechas a mano, listas para enviar.
-        </p>
+        {leadText && (
+          <p className="lead" style={{ marginTop: 12 }}>
+            {leadText}
+          </p>
+        )}
       </header>
       <CatalogGrid products={products} categories={categories} />
     </div>

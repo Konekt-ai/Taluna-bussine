@@ -554,3 +554,31 @@ body::before {
   .hero__visual { order: -1; max-width: 460px; margin-inline: auto; }
   .hero__meta { justify-content: center; }
 }
+
+/* =====================================================================
+   BLOQUES QUE LA DUEÑA AGREGA DESDE EL ORGANIZADOR
+   (aviso / franja, texto+imagen volteado y galería de fotos)
+   ===================================================================== */
+.aviso { background: var(--wine); color: var(--cream); padding: 18px 0; }
+.aviso__in { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; text-align: center; }
+.aviso__text { font-size: clamp(.95rem, 1.4vw, 1.12rem); letter-spacing: .01em; }
+.aviso__text em { font-style: italic; color: var(--clay-soft); }
+.aviso__cta {
+  display: inline-flex; align-items: center; gap: .5em;
+  padding: 9px 18px; border-radius: var(--r-pill);
+  background: rgba(244,237,225,.14); color: var(--cream);
+  font-size: .9rem; font-weight: 600; border: 1px solid rgba(244,237,225,.28);
+  transition: background .3s;
+}
+.aviso__cta:hover { background: rgba(244,237,225,.26); }
+
+/* Texto + imagen: la foto del otro lado */
+.detail--flip .detail__media { order: 2; }
+@media (max-width: 860px) { .detail--flip .detail__media { order: 0; } }
+
+/* Galería de fotos */
+.galeria { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.galeria__item { aspect-ratio: 4 / 5; border-radius: var(--r-md); overflow: hidden; box-shadow: var(--sh-1); background: var(--sand); }
+.galeria__item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .7s var(--ease-out); }
+.galeria__item:hover img { transform: scale(1.05); }
+@media (max-width: 760px) { .galeria { grid-template-columns: repeat(2, 1fr); } }

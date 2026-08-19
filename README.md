@@ -48,6 +48,39 @@ exactamente qué se está mostrando, qué no y por qué.
 Si esa vista no existe o falla, la tienda usa como respaldo el catálogo viejo en
 tablas: nunca se queda en blanco.
 
+---
+
+## 3. La página también se edita desde el Organizador
+
+En el Organizador, la sección **Tu página** deja a Taluna:
+
+- cambiar **textos, botones y fotos** de cada bloque del home;
+- **mover los bloques de lugar** (flechas ↑↓) y **ocultar** los que no quiera;
+- **agregar bloques nuevos**: un *aviso* (franja de promoción), *texto + imagen*
+  o una *galería de fotos*;
+- cambiar el **video o la foto de portada** (el video sube directo a Supabase
+  porque no cabe por las rutas del servidor);
+- editar **WhatsApp, correo, redes y mapa**, que alimentan el menú, el pie y
+  todos los botones de WhatsApp del sitio;
+- editar el **encabezado del catálogo** y los textos del **pie de página**.
+
+Lo que NO se puede tocar es el diseño (colores, tipografías, tamaños): así la
+página siempre se ve bien pase lo que pase.
+
+En los títulos, un **salto de línea** parte el renglón y lo que va `*entre
+asteriscos*` sale en cursiva (el acento vino de la marca).
+
+### Encenderlo (una sola vez)
+
+Supabase → **SQL Editor → New query** → pega todo `supabase/site-content.sql` y
+dale **Run**. Crea la vista `studio_site`. Mientras no exista (o si falla), la
+tienda muestra sus textos originales, que son los mismos que ves hoy.
+
+> Los textos originales viven en `lib/site-content.js` y hay una **copia
+> idéntica** en `public/estudio.html` del Organizador (constante
+> `SITE_DEFAULTS`), que es la que se siembra la primera vez que abren la
+> pantalla. Si cambias un original aquí, cámbialo también allá.
+
 ### Que el cambio se vea al instante (opcional)
 
 Sin esto la tienda ya se refresca sola cada 60 segundos. Para que salga en el
@@ -60,7 +93,7 @@ momento exacto en que la dueña guarda:
 
 ---
 
-## 3. Crear la base de datos (Supabase) — gratis
+## 4. Crear la base de datos (Supabase) — gratis
 
 1. Entra a https://supabase.com y crea cuenta (gratis).
 2. **New project** → ponle nombre (ej. `taluna`) y una contraseña de base de datos.
@@ -91,7 +124,7 @@ bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
 
 ---
 
-## 4. Publicar la web (Vercel) — gratis
+## 5. Publicar la web (Vercel) — gratis
 
 1. Sube este proyecto a un repo de GitHub.
 2. Entra a https://vercel.com, **Add New → Project**, importa el repo.
@@ -100,7 +133,7 @@ bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
 
 ---
 
-## 5. Dominio gratis (DigitalPlat FreeDomain)
+## 6. Dominio gratis (DigitalPlat FreeDomain)
 
 1. Entra a https://domain.digitalplat.org y registra tu dominio gratis (ej. `taluna.dpdns.org` o un TLD gratuito).
 2. En Vercel: tu proyecto → **Settings → Domains** → agrega tu dominio.
@@ -109,7 +142,7 @@ bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
 
 ---
 
-## 6. ¿Dónde toca cada cosa?
+## 7. ¿Dónde toca cada cosa?
 
 | Quiero cambiar...            | Archivo |
 |------------------------------|---------|
@@ -118,6 +151,7 @@ bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
 | Textos del home              | `app/page.js` |
 | Estructura de la base datos  | `supabase/schema.sql` |
 | Qué se publica y cómo se ve el catálogo del Organizador | `supabase/studio-catalog.sql` y `lib/studio.js` |
+| Textos originales de la página y bloques | `lib/site-content.js` y `components/blocks/HomeBlocks.js` |
 | Cada cuánto se refresca el catálogo | `CATALOG_REVALIDATE` en `lib/supabase.js` y el `export const revalidate` de cada página |
 | Productos de ejemplo         | `supabase/seed.sql` y `lib/sample-data.js` |
 | Número de WhatsApp           | variable `NEXT_PUBLIC_WHATSAPP` |
@@ -134,15 +168,18 @@ app/
   producto/[slug]/page.js Ficha de producto
 components/              Nav, Footer, ProductCard, CatalogGrid, WhatsAppButton
   api/revalidate/route.js  Refresco inmediato que dispara el Organizador
+components/blocks/       Cada bloque del home (portada, artesanal, galería…)
 lib/
   supabase.js            Cliente de Supabase
   studio.js              Catálogo del Organizador -> productos de la tienda
+  site-content.js        Textos/bloques de la página (con sus originales)
   products.js            Lectura de datos (Organizador -> tablas -> ejemplo)
   sample-data.js         Datos de ejemplo
 supabase/
   schema.sql             Esquema de la base de datos
   seed.sql               Datos de ejemplo
   studio-catalog.sql     Vista pública del catálogo del Organizador
+  site-content.sql       Vista pública de la página editable
 ```
 
 ---

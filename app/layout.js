@@ -4,6 +4,11 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { CartProvider } from '@/components/CartContext';
+import { getSiteContent } from '@/lib/site-content';
+
+// Los datos de contacto y los textos del pie los edita la dueña desde el
+// Organizador; se refrescan solos cada minuto igual que el catálogo.
+export const revalidate = 60;
 
 export const metadata = {
   title: 'Taluna · Bolsas artesanales hechas en México',
@@ -12,7 +17,9 @@ export const metadata = {
   icons: { icon: '/favicon.png' },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const { contacto, footer } = await getSiteContent();
+
   return (
     <html lang="es">
       <head>
@@ -28,10 +35,10 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <CartProvider>
-          <Nav />
+          <Nav contacto={contacto} />
           <main className="min-h-[60vh]">{children}</main>
-          <Footer />
-          <WhatsAppButton />
+          <Footer contacto={contacto} texts={footer} />
+          <WhatsAppButton phone={contacto.whatsapp} />
           <ScrollReveal />
         </CartProvider>
       </body>

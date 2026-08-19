@@ -30,6 +30,9 @@ function handle(request) {
   }
 
   for (const path of PATHS) revalidatePath(path, 'page');
+  // El menú, el pie y el botón de WhatsApp viven en el layout y también
+  // se editan desde el Organizador: hay que refrescarlo.
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true, revalidated: PATHS });
 }
 

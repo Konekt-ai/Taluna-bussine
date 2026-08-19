@@ -15,12 +15,13 @@ const LINKS = [
   { href: '/#contacto', label: 'Contacto' },
 ];
 
-export default function Nav() {
+export default function Nav({ contacto }) {
   const pathname = usePathname();
   const { count } = useCart();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const waHref = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(
+  // El número lo edita la dueña desde el Organizador; site.js es el respaldo.
+  const waHref = `https://wa.me/${contacto?.whatsapp || site.whatsapp}?text=${encodeURIComponent(
     'Hola Taluna, me gustaría hacer un pedido.'
   )}`;
 

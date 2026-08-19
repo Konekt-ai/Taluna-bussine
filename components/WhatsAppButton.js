@@ -1,11 +1,13 @@
 'use client';
 
-const phone = process.env.NEXT_PUBLIC_WHATSAPP || '5213331292868';
+const FALLBACK = process.env.NEXT_PUBLIC_WHATSAPP || '5213331292868';
 
+// El número viene del Organizador (el layout lo pasa); si no, el de respaldo.
 export default function WhatsAppButton({
+  phone,
   message = 'Hola Taluna, me interesa una pieza que vi en su página.',
 }) {
-  const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const href = `https://wa.me/${phone || FALLBACK}?text=${encodeURIComponent(message)}`;
   return (
     <a className="wa-float" href={href} target="_blank" rel="noopener noreferrer">
       <span className="wa-dot" />
