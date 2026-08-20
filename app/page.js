@@ -1,6 +1,5 @@
 import { getProducts, getCategories, formatPrice } from '@/lib/products';
 import { getSiteContent, ASSETS } from '@/lib/site-content';
-import HomeEffects from '@/components/HomeEffects';
 import { BLOCKS } from '@/components/blocks/HomeBlocks';
 
 // El catálogo y los textos se refrescan solos cada minuto (lo que la dueña
@@ -24,18 +23,19 @@ export default async function Home() {
 
   const { contacto } = content;
 
+  // La cuadrícula compacta del diseño va de 5 en 5 en escritorio.
   const featured = (products.filter((p) => p.is_featured).length
     ? products.filter((p) => p.is_featured)
     : products
-  ).slice(0, 4);
+  ).slice(0, 10);
 
   // Portada por categoría: primera foto real de un producto de esa categoría.
   const coverFor = (slug) =>
     products.find((p) => p.category_slug === slug && p.images?.[0]?.url)?.images?.[0]?.url || null;
 
   // Fotos reales para la comunidad (Instagram); si faltan, el asset artesanal.
-  const productImgs = products.map((p) => p.images?.[0]?.url).filter(Boolean);
-  const igImgs = Array.from({ length: 5 }, (_, i) => productImgs[i] || ASSETS.craft);
+  const productImgs = products.flatMap((p) => (p.images || []).map((i) => i.url)).filter(Boolean);
+  const igImgs = Array.from({ length: 8 }, (_, i) => productImgs[i] || ASSETS.craft);
 
   const ctx = {
     products,
@@ -57,7 +57,6 @@ export default async function Home() {
           const Block = BLOCKS[b.type];
           return Block ? <Block key={b.id} b={b} ctx={ctx} /> : null;
         })}
-      <HomeEffects />
     </>
   );
 }

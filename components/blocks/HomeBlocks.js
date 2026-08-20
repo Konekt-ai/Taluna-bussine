@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
+import Pic from '@/components/Pic';
+import HeroMedia from '@/components/HeroMedia';
 import RichText, { plainText } from './RichText';
 import { hrefFor, isExternal } from '@/lib/site-content';
 
@@ -9,16 +11,30 @@ import { hrefFor, isExternal } from '@/lib/site-content';
 //  { ctx } (lo que sale del catálogo: productos, categorías, contacto…).
 //  El diseño NO es editable a propósito: solo textos, fotos, botones,
 //  el orden y si se muestra o no. Así la página siempre se ve bien.
+//
+//  El look es el del diseño aprobado (trabajo_grafico): fondo ivory,
+//  tipografía Figtree, etiquetas chiquitas en mayúsculas, foto grande a
+//  sangre y enlaces subrayados en vez de botones de colores.
 // =====================================================================
 
+/* ---------------------------- iconos ---------------------------- */
+
 const arrow = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="13 6 19 12 13 18" />
+  </svg>
+);
+
+const arrowUp = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="7" y1="17" x2="17" y2="7" />
+    <polyline points="9 7 17 7 17 15" />
   </svg>
 );
 
 const igIcon = (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
     <rect x="3" y="3" width="18" height="18" rx="5" />
     <circle cx="12" cy="12" r="4" />
     <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
@@ -31,18 +47,7 @@ const waIcon = (
   </svg>
 );
 
-const POINT_ICONS = [
-  <svg key="0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-    <path d="M12 3v18M5 8l7-5 7 5M5 8v8l7 5 7-5V8" strokeLinejoin="round" />
-  </svg>,
-  <svg key="1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-    <path d="M4 12c4-6 12-6 16 0-4 6-12 6-16 0Z" />
-    <circle cx="12" cy="12" r="2.4" />
-  </svg>,
-  <svg key="2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-    <path d="M20 7 9 18l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>,
-];
+/* --------------------------- botones ---------------------------- */
 
 // Botón cuyo destino es un lugar con nombre (nunca una URL suelta, para
 // que no se pueda dejar un enlace roto desde el panel).
@@ -67,41 +72,58 @@ function Cta({ cta, contacto, className, children }) {
   );
 }
 
+// Cabecera de sección: etiqueta + título a la izquierda, enlace a la derecha.
+function SecHead({ b, ctx, link }) {
+  return (
+    <div className="sec-head">
+      <div className="sec-head__t reveal">
+        {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+        <h2 className="sec-title">
+          <RichText text={b.title} />
+        </h2>
+        {b.lead && <p className="lead">{b.lead}</p>}
+      </div>
+      {link && (
+        <Cta cta={b.cta} contacto={ctx.contacto} className="seelink reveal">
+          {arrowUp}
+        </Cta>
+      )}
+    </div>
+  );
+}
+
 /* ===================== HERO ===================== */
 function Hero({ b, ctx }) {
   const { products, heroFeat, contacto, formatPrice } = ctx;
   const media = b.media || {};
-  const stats = b.stats || [];
+  const stats = (b.stats || []).filter((s) => s && (s.n || s.l));
   // Si eligieron foto pero no subieron ninguna, se queda el video.
-  const heroImage = media.type === 'image' ? media.image : '';
+  const tipo = media.type === 'image' && (media.image || media.imageMobile) ? 'image' : 'video';
 
   return (
-    <section className="hero">
-      <div className="hero__blob" />
-      <div className="wrap hero__grid">
-        <div className="hero__text">
-          {b.eyebrow && (
-            <span className="hero__eyebrow eyebrow reveal">
-              <span className="dot" /> {b.eyebrow}
-            </span>
-          )}
-          <h1 className="hero__title display reveal" data-d="1">
+    <section className="hero" data-hero>
+      {/* Elige sola la versión de celular o la de pantalla grande */}
+      <HeroMedia media={{ ...media, type: tipo }} alt={plainText(b.title) || 'Taluna'} />
+
+      <div className="hero__scrim" />
+
+      <div className="hero__in">
+        <div className="hero__inner">
+          {b.eyebrow && <span className="kicker hero__eyebrow">{b.eyebrow}</span>}
+
+          <h1 className="hero__title">
             <RichText text={b.title} />
           </h1>
-          {b.lead && (
-            <p className="hero__lead lead reveal" data-d="2">
-              {b.lead}
-            </p>
-          )}
-          <div className="hero__cta reveal" data-d="3">
-            <Cta cta={b.cta1} contacto={contacto} className="btn btn--primary">
-              {' '}
-              {arrow}
-            </Cta>
-            <Cta cta={b.cta2} contacto={contacto} className="btn btn--ghost" />
+
+          {b.lead && <p className="hero__lead">{b.lead}</p>}
+
+          <div className="hero__cta">
+            <Cta cta={b.cta1} contacto={contacto} className="btn btn--light" />
+            <Cta cta={b.cta2} contacto={contacto} className="btn btn--onmedia" />
           </div>
+
           {stats.length > 0 && (
-            <div className="hero__meta reveal" data-d="4">
+            <div className="hero__meta">
               {stats.map((s, i) => (
                 <div key={i}>
                   {/* número vacío = se cuenta solo */}
@@ -112,74 +134,117 @@ function Hero({ b, ctx }) {
             </div>
           )}
         </div>
+      </div>
 
-        <div className="hero__visual reveal" data-d="2">
-          <div className="hero__media">
-            {heroImage ? (
-              <img
-                className="hero__video"
-                src={heroImage}
-                alt={plainText(b.title) || 'Taluna'}
-                loading="eager"
-              />
-            ) : (
-              <video
-                className="hero__video"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                poster={media.poster || undefined}
-                aria-label="Bolsa Taluna hecha a mano en movimiento"
-              >
-                <source src={media.src} type="video/mp4" />
-              </video>
+      {b.showCap !== false && heroFeat && (
+        <p className="hero__cap">
+          <b>{heroFeat.name}</b>
+          <br />
+          desde {formatPrice(heroFeat.price, heroFeat.currency)}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/* ============ BLOQUE EDITORIAL (foto grande a sangre) ============ */
+// Lo comparten "Artesanal" y el bloque "Editorial" que la dueña puede
+// agregar: misma caja, mismos textos encima de la foto.
+function EditorialBox({ b, ctx, alt }) {
+  return (
+    <section className="section--tight editorial">
+      <div className="wrap">
+        <div className="editorial__box reveal">
+          <Pic
+            className="editorial__img"
+            src={b.image}
+            mobile={b.imageMobile}
+            alt={alt}
+            fallback={<div className="imgph">{plainText(b.title)}</div>}
+          />
+          <div className="editorial__scrim" />
+
+          <div className="editorial__body">
+            {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+            <h2 className="editorial__title">
+              <RichText text={b.title} />
+            </h2>
+            {(b.text || b.lead) && <p className="editorial__text">{b.text || b.lead}</p>}
+
+            {(b.chips || []).filter(Boolean).length > 0 && (
+              <div className="editorial__chips">
+                {(b.chips || []).filter(Boolean).map((c, i) => (
+                  <span className="editorial__chip" key={i}>
+                    {c}
+                  </span>
+                ))}
+              </div>
             )}
+
+            <Cta cta={b.cta} contacto={ctx.contacto} className="ulink ulink--light">
+              {arrow}
+            </Cta>
           </div>
-          {b.showCap !== false && heroFeat && (
-            <p className="hero__cap">
-              <b>{heroFeat.name}</b> · piel y chaquira · desde{' '}
-              {formatPrice(heroFeat.price, heroFeat.currency)}
-            </p>
-          )}
         </div>
       </div>
     </section>
   );
 }
 
-/* ===================== ARTESANAL (craft) ===================== */
 function Craft({ b, ctx }) {
   return (
-    <section className="craft reveal">
-      {b.image && (
-        <img
-          className="craft__img"
-          src={b.image}
-          alt="Straps de chaquira tejida a mano con detalles de piel y herrajes de latón"
-          loading="lazy"
-        />
-      )}
-      <div className="craft__scrim" />
-      <div className="wrap craft__inner">
-        <div className="craft__panel liquid-glass-strong">
-          {b.eyebrow && <span className="craft__eyebrow">{b.eyebrow}</span>}
-          <h2 className="craft__title">
+    <EditorialBox
+      b={b}
+      ctx={ctx}
+      alt="Straps de chaquira tejida a mano con detalles de piel y herrajes de latón"
+    />
+  );
+}
+
+function Editorial({ b, ctx }) {
+  // Sin foto no tiene sentido: el bloque entero es la foto.
+  if (!b.image) return null;
+  return <EditorialBox b={b} ctx={ctx} alt={plainText(b.title) || 'Taluna'} />;
+}
+
+/* =============== COMBINACIÓN DEL MES (foto ancha) =============== */
+function Combinacion({ b, ctx }) {
+  if (!b.image) return null;
+
+  return (
+    <section className="section--tight combo">
+      <div className="wrap">
+        <div className="reveal" style={{ marginBottom: 24 }}>
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title" style={{ marginTop: 10 }}>
             <RichText text={b.title} />
           </h2>
-          {b.text && <p className="craft__p">{b.text}</p>}
-          {(b.chips || []).length > 0 && (
-            <div className="craft__chips">
-              {(b.chips || []).filter(Boolean).map((c, i) => (
-                <span className="craft__chip liquid-glass" key={i}>
-                  {c}
-                </span>
-              ))}
-            </div>
-          )}
-          <Cta cta={b.cta} contacto={ctx.contacto} className="craft__cta liquid-glass-strong" />
         </div>
+
+        <div style={{ position: 'relative' }} className="reveal" data-d="1">
+          <div className="combo__box">
+            <Pic
+              className="combo__img"
+              src={b.image}
+              mobile={b.imageMobile}
+              alt={plainText(b.title)}
+            />
+            {b.tag && <span className="combo__tag">{b.tag}</span>}
+          </div>
+
+          {/* Producto recortado que sale del encuadre */}
+          {b.cutout && (
+            <img className="combo__cut" src={b.cutout} alt="" loading="lazy" aria-hidden="true" />
+          )}
+        </div>
+
+        {b.cta?.text && (
+          <div style={{ marginTop: 40 }} className="reveal" data-d="2">
+            <Cta cta={b.cta} contacto={ctx.contacto} className="ulink">
+              {arrow}
+            </Cta>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -187,44 +252,40 @@ function Craft({ b, ctx }) {
 
 /* ===================== CATEGORÍAS ===================== */
 function Categorias({ b, ctx }) {
-  const { categories, coverFor, contacto } = ctx;
+  const { categories, coverFor } = ctx;
+  if (!categories.length) return null;
+  // Con dos categorías se ven mejor del mismo tamaño, a media pantalla.
+  const few = categories.length <= 2;
 
   return (
     <section className="section" id="categorias">
       <div className="wrap">
-        <div className="sec-head">
-          <div className="reveal">
-            {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-            <h2 className="sec-title" style={{ marginTop: 14 }}>
-              <RichText text={b.title} />
-            </h2>
-          </div>
-          <Cta cta={b.cta} contacto={contacto} className="btn btn--ghost reveal">
-            {' '}
-            {arrow}
-          </Cta>
-        </div>
-        <div className="collections reveal">
+        <SecHead b={b} ctx={ctx} link />
+
+        <div className={`collections${few ? ' collections--few' : ''}`} data-stagger>
           {categories.map((c, i) => {
             const cover = coverFor(c.slug);
-            // Bento: la primera categoría es el tile protagonista, la segunda ancho.
-            const sizeClass = i === 0 ? ' col-tile--xl' : i === 1 ? ' col-tile--wide' : '';
+            // La primera categoría manda: ocupa el doble de ancho.
             return (
-              <Link className={`col-tile${sizeClass}`} href="/catalogo" key={c.slug}>
-                {cover ? (
-                  <img className="col-tile__img" src={cover} alt={c.name} loading="lazy" />
-                ) : (
-                  <div className="col-tile__ph imgph">{c.name}</div>
-                )}
-                <div className="col-tile__overlay" />
-                <div className="col-tile__body">
-                  <div className="col-tile__name">{c.name}</div>
-                  <span className="col-tile__cta">
-                    {i === 0 ? 'Ver colección' : 'Explorar'}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
+              <Link
+                className={`col-tile reveal${!few && i === 0 ? ' col-tile--xl' : ''}`}
+                href={`/catalogo?c=${c.slug}`}
+                key={c.slug}
+              >
+                <div className="col-tile__box">
+                  {cover ? (
+                    <img className="col-tile__img" src={cover} alt={c.name} loading="lazy" />
+                  ) : (
+                    <div className="imgph">{c.name}</div>
+                  )}
+                  <div className="col-tile__overlay" />
+                  <div className="col-tile__body">
+                    <div className="col-tile__name">{c.name}</div>
+                    <span className="col-tile__cta">
+                      {i === 0 ? 'Ver colección' : 'Explorar'}
+                      {arrow}
+                    </span>
+                  </div>
                 </div>
               </Link>
             );
@@ -236,26 +297,32 @@ function Categorias({ b, ctx }) {
 }
 
 /* ===================== DESTACADOS ===================== */
+// La cuadrícula compacta del diseño: tres por renglón en el celular.
 function Destacados({ b, ctx }) {
+  if (!ctx.featured.length) return null;
+
   return (
     <section className="section section--tight" id="destacados">
       <div className="wrap">
         <div className="sec-head">
-          <div className="reveal">
-            {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-            <h2 className="sec-title" style={{ marginTop: 14 }}>
+          <div className="sec-head__t reveal">
+            {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+            <h2 className="sec-title">
               <RichText text={b.title} />
             </h2>
+            {b.lead && <p className="lead">{b.lead}</p>}
           </div>
-          {b.lead && (
-            <p className="lead reveal" data-d="1">
-              {b.lead}
-            </p>
-          )}
+          <Link href="/catalogo" className="seelink reveal">
+            {arrowUp}
+            Ver todo
+          </Link>
         </div>
-        <div className="pgrid">
+
+        <div className="pgrid pgrid--compact" data-stagger>
           {ctx.featured.map((p) => (
-            <ProductCard key={p.slug} product={p} />
+            <div className="reveal" key={p.slug}>
+              <ProductCard product={p} variant="min" />
+            </div>
           ))}
         </div>
       </div>
@@ -268,31 +335,37 @@ function Historia({ b }) {
   return (
     <section className="section" id="historia">
       <div className="wrap">
-        <div className="story reveal">
-          <div className="story__grid">
-            <div className="story__media">
-              {b.image1 && (
-                <img className="story__img" src={b.image1} alt="Detalle artesanal Taluna" loading="lazy" />
-              )}
-              {b.image2 && <img className="float" src={b.image2} alt="Bolsa Taluna" loading="lazy" />}
-            </div>
-            <div className="story__body">
-              {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-              <h2 className="sec-title">
-                <RichText text={b.title} />
-              </h2>
-              {b.lead && <p className="lead">{b.lead}</p>}
-              <div className="story__points">
-                {(b.points || []).map((p, i) => (
-                  <div className="story__point" key={i}>
-                    <span className="ico">{POINT_ICONS[i % POINT_ICONS.length]}</span>
-                    <div>
-                      <h4>{p.t}</h4>
-                      <p>{p.d}</p>
-                    </div>
+        <div className="story__grid">
+          <div className="story__media reveal">
+            <Pic
+              className="story__img"
+              src={b.image1}
+              mobile={b.image1Mobile}
+              alt="Detalle artesanal Taluna"
+              fallback={<div className="story__img imgph">Taluna</div>}
+            />
+            {b.image2 && (
+              <img className="story__float" src={b.image2} alt="Bolsa Taluna" loading="lazy" />
+            )}
+          </div>
+
+          <div className="story__body reveal" data-d="1">
+            {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+            <h2 className="sec-title">
+              <RichText text={b.title} />
+            </h2>
+            {b.lead && <p className="lead">{b.lead}</p>}
+
+            <div className="story__points">
+              {(b.points || []).map((p, i) => (
+                <div className="story__point" key={i}>
+                  <span className="num">{String(i + 1).padStart(2, '0')}</span>
+                  <div>
+                    <h4>{p.t}</h4>
+                    <p>{p.d}</p>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -307,14 +380,22 @@ function Materiales({ b }) {
     <section className="section section--tight">
       <div className="wrap detail">
         <div className="detail__media reveal">
-          {b.image && <img className="detail__img" src={b.image} alt="Detalle de la piel Taluna" loading="lazy" />}
+          <Pic
+            className="detail__img"
+            src={b.image}
+            mobile={b.imageMobile}
+            alt="Detalle de la piel Taluna"
+            fallback={<div className="imgph">Materiales</div>}
+          />
         </div>
+
         <div className="reveal" data-d="1">
-          {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-          <h2 className="sec-title" style={{ margin: '14px 0 18px' }}>
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title" style={{ margin: '12px 0 16px' }}>
             <RichText text={b.title} />
           </h2>
           {b.lead && <p className="lead">{b.lead}</p>}
+
           <div className="matgrid">
             {(b.items || []).map((m, i) => (
               <div className="mat" key={i}>
@@ -332,31 +413,22 @@ function Materiales({ b }) {
 /* ===================== COMUNIDAD ===================== */
 function Comunidad({ b, ctx }) {
   const { igImgs, contacto } = ctx;
+  // Si la dueña subió fotos propias al bloque, esas mandan.
+  const imgs = (b.images || []).filter(Boolean).length ? b.images.filter(Boolean) : igImgs;
+  if (!imgs.length) return null;
 
   return (
     <section className="section section--tight" id="comunidad">
       <div className="wrap">
-        <div className="sec-head">
-          <div className="reveal">
-            {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-            <h2 className="sec-title" style={{ marginTop: 14 }}>
-              <RichText text={b.title} />
-            </h2>
-          </div>
-          {b.cta?.text && (
-            <a
-              className="btn btn--ghost reveal"
-              href={contacto.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {igIcon}
-              {b.cta.text}
-            </a>
-          )}
+        <div className="ig-head reveal">
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title">
+            <RichText text={b.title} />
+          </h2>
         </div>
-        <div className="iggrid reveal">
-          {igImgs.map((src, i) => (
+
+        <div className="rail rail--bleed ig-rail" data-stagger>
+          {imgs.map((src, i) => (
             <a
               className="igtile"
               href={contacto.instagram}
@@ -364,15 +436,19 @@ function Comunidad({ b, ctx }) {
               rel="noopener noreferrer"
               key={i}
             >
-              <img className="ig__img" src={src} alt={contacto.igHandle || '@talunamx'} loading="lazy" />
-              <span className="igtile__ov">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <rect x="3" y="3" width="18" height="18" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                </svg>
-              </span>
+              <div className="igtile__box">
+                <img src={src} alt={contacto.igHandle || '@talunamx'} loading="lazy" />
+                <span className="igtile__ov">{igIcon}</span>
+              </div>
             </a>
           ))}
+        </div>
+
+        <div className="ig-foot reveal">
+          <a className="ulink" href={contacto.instagram} target="_blank" rel="noopener noreferrer">
+            {b.cta?.text || 'Ver en Instagram'}
+            {arrowUp}
+          </a>
         </div>
       </div>
     </section>
@@ -387,58 +463,58 @@ function Contacto({ b, ctx }) {
     <section className="section section--tight" id="contacto">
       <div className="wrap">
         <div className="contact reveal">
-          <div className="contact__grid">
-            <div className="contact__body">
-              {b.eyebrow && (
-                <span className="eyebrow" style={{ color: 'var(--clay-soft)' }}>
-                  {b.eyebrow}
+          <div className="contact__body">
+            {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+            <h2 className="sec-title" style={{ margin: '12px 0 16px' }}>
+              <RichText text={b.title} />
+            </h2>
+            {b.lead && <p className="lead">{b.lead}</p>}
+
+            <div className="contact__list">
+              <a
+                className="contact__item"
+                href={waHref('Hola Taluna, me gustaría hacer un pedido.')}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span className="ic">{waIcon}</span>
+                <div>
+                  <div className="t1">WhatsApp</div>
+                  <div className="t2">+52 {contacto.phones?.[0]}</div>
+                </div>
+              </a>
+
+              <a className="contact__item" href={contacto.instagram} target="_blank" rel="noopener noreferrer">
+                <span className="ic">{igIcon}</span>
+                <div>
+                  <div className="t1">Instagram</div>
+                  <div className="t2">{contacto.igHandle || '@talunamx'}</div>
+                </div>
+              </a>
+
+              <a className="contact__item" href={`mailto:${contacto.email}`}>
+                <span className="ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                    <rect x="3" y="5" width="18" height="14" rx="3" />
+                    <path d="m4 7 8 6 8-6" strokeLinecap="round" />
+                  </svg>
                 </span>
-              )}
-              <h2 className="sec-title" style={{ margin: '14px 0 16px' }}>
-                <RichText text={b.title} />
-              </h2>
-              {b.lead && (
-                <p className="lead" style={{ color: 'rgba(235,225,209,.72)', maxWidth: '42ch' }}>
-                  {b.lead}
-                </p>
-              )}
-              <div className="contact__list">
-                <a
-                  className="contact__item"
-                  href={waHref('Hola Taluna, me gustaría hacer un pedido.')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="ic">{waIcon}</span>
-                  <div>
-                    <div className="t1">WhatsApp</div>
-                    <div className="t2">+52 {contacto.phones?.[0]}</div>
-                  </div>
-                </a>
-                <a className="contact__item" href={contacto.instagram} target="_blank" rel="noopener noreferrer">
-                  <span className="ic">{igIcon}</span>
-                  <div>
-                    <div className="t1">Instagram</div>
-                    <div className="t2">{contacto.igHandle || '@talunamx'}</div>
-                  </div>
-                </a>
-                <a className="contact__item" href={`mailto:${contacto.email}`}>
-                  <span className="ic">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                      <rect x="3" y="5" width="18" height="14" rx="3" />
-                      <path d="m4 7 8 6 8-6" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                  <div>
-                    <div className="t1">Correo</div>
-                    <div className="t2">{contacto.email}</div>
-                  </div>
-                </a>
-              </div>
+                <div>
+                  <div className="t1">Correo</div>
+                  <div className="t2">{contacto.email}</div>
+                </div>
+              </a>
             </div>
-            <div className="contact__media">
-              {b.image && <img className="contact__img" src={b.image} alt="Bolsa Taluna" loading="lazy" />}
-            </div>
+          </div>
+
+          <div className="contact__media">
+            <Pic
+              className="contact__img"
+              src={b.image}
+              mobile={b.imageMobile}
+              alt="Bolsa Taluna"
+              fallback={<div className="imgph">Taluna</div>}
+            />
           </div>
         </div>
       </div>
@@ -452,9 +528,9 @@ function Contacto({ b, ctx }) {
 function Aviso({ b, ctx }) {
   if (!b.text?.trim()) return null;
   return (
-    <section className="aviso reveal">
+    <section className="aviso">
       <div className="wrap aviso__in">
-        <span className="aviso__text">
+        <span className="aviso__text rich">
           <RichText text={b.text} />
         </span>
         <Cta cta={b.cta} contacto={ctx.contacto} className="aviso__cta" />
@@ -469,24 +545,26 @@ function TextoImagen({ b, ctx }) {
     <section className="section section--tight">
       <div className={`wrap detail${b.side === 'izquierda' ? ' detail--flip' : ''}`}>
         <div className="detail__media reveal">
-          {b.image ? (
-            <img className="detail__img" src={b.image} alt={plainText(b.title)} loading="lazy" />
-          ) : (
-            <div className="imgph" style={{ width: '100%', height: '100%' }}>
-              {plainText(b.title)}
-            </div>
-          )}
+          <Pic
+            className="detail__img"
+            src={b.image}
+            mobile={b.imageMobile}
+            alt={plainText(b.title)}
+            fallback={<div className="imgph">{plainText(b.title)}</div>}
+          />
         </div>
+
         <div className="reveal" data-d="1">
-          {b.eyebrow && <span className="eyebrow">{b.eyebrow}</span>}
-          <h2 className="sec-title" style={{ margin: '14px 0 18px' }}>
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title" style={{ margin: '12px 0 16px' }}>
             <RichText text={b.title} />
           </h2>
           {b.text && <p className="lead">{b.text}</p>}
-          <Cta cta={b.cta} contacto={ctx.contacto} className="btn btn--primary">
-            {' '}
-            {arrow}
-          </Cta>
+          <div style={{ marginTop: 26 }}>
+            <Cta cta={b.cta} contacto={ctx.contacto} className="ulink">
+              {arrow}
+            </Cta>
+          </div>
         </div>
       </div>
     </section>
@@ -506,9 +584,9 @@ function Galeria({ b }) {
             <RichText text={b.title} />
           </h2>
         )}
-        <div className="galeria reveal">
+        <div className="galeria" data-stagger>
           {images.map((src, i) => (
-            <div className="galeria__item" key={i}>
+            <div className="galeria__item reveal" key={i}>
               <img src={src} alt={plainText(b.title) || 'Taluna'} loading="lazy" />
             </div>
           ))}
@@ -530,4 +608,6 @@ export const BLOCKS = {
   aviso: Aviso,
   textoImagen: TextoImagen,
   galeria: Galeria,
+  editorial: Editorial,
+  combinacion: Combinacion,
 };

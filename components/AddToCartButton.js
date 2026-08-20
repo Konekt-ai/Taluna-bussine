@@ -4,40 +4,35 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from './CartContext';
 
+// Botón sencillo de "agregar a la bolsa". La ficha de producto usa
+// components/ProductBuy.js (que además pone la barra fija del celular);
+// este queda para cualquier otro lugar donde haga falta uno suelto.
 export default function AddToCartButton({ product, soldOut = false }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
   if (soldOut) {
     return (
-      <button
-        disabled
-        className="mt-8 inline-flex w-full cursor-not-allowed items-center justify-center rounded-full bg-muted px-6 py-4 text-center text-cream sm:w-auto"
-      >
-        Agotado
+      <button disabled className="btn btn--block" style={{ marginTop: 26 }}>
+        Agotada
       </button>
     );
   }
 
-  function handleAdd() {
-    addItem(product);
-    setAdded(true);
-  }
-
   return (
-    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="pdp__actions">
       <button
-        onClick={handleAdd}
-        className="inline-flex w-full items-center justify-center rounded-full bg-wine px-6 py-4 text-center text-cream transition-colors hover:bg-wineSoft sm:w-auto"
+        className="btn btn--primary btn--block"
+        onClick={() => {
+          addItem(product);
+          setAdded(true);
+        }}
       >
-        Agregar al carrito
+        {added ? 'Agregada ✓' : 'Agregar a la bolsa'}
       </button>
       {added && (
-        <Link
-          href="/carrito"
-          className="inline-flex w-full items-center justify-center rounded-full border border-wine px-6 py-4 text-center text-wine transition-colors hover:bg-wine hover:text-cream sm:w-auto"
-        >
-          Ver carrito →
+        <Link href="/carrito" className="btn btn--outline btn--block">
+          Ver mi bolsa
         </Link>
       )}
     </div>

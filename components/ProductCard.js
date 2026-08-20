@@ -5,6 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from './CartContext';
 
+// =====================================================================
+//  FICHA DE PRODUCTO EN CUADRÍCULA
+//  Diseño aprobado: foto casi a escuadra sobre fondo crema, y debajo
+//  nombre y precio en texto chiquito. Nada de recuadros ni sombras.
+//  variant="min" es la versión compacta de "Lo más vendido".
+// =====================================================================
+
 function formatPrice(value, currency = 'MXN') {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
@@ -16,16 +23,22 @@ function formatPrice(value, currency = 'MXN') {
 // Mapea nombres de color reales (variantes) a un swatch. Solo colores conocidos:
 // las variantes que no son color (ej. "Para bolsa") simplemente no muestran swatch.
 const COLOR_MAP = {
-  negra: '#2A251F', negro: '#2A251F',
+  negra: '#2A2622', negro: '#2A2622',
   blanca: '#F4EDE1', blanco: '#F4EDE1',
-  camel: '#C7A079',
-  taupe: '#9C8B76',
+  crema: '#E4DACB',
+  camel: '#A9743F',
+  arena: '#C9B79C',
+  taupe: '#9B8C79',
+  acero: '#8D8B87',
   gris: '#8A8A86',
+  cafe: '#7A5238', café: '#7A5238',
+  vino: '#6E2F37',
   roja: '#7A2E3B', rojo: '#7A2E3B',
+  salvia: '#A8B29A',
   tinta: '#2E2A45',
   'azul marino': '#28344B',
   'azul claro': '#9DB6CC',
-  rosa: '#D8A7AE',
+  rosa: '#D8B7AE',
 };
 
 function swatchesFor(product) {
@@ -39,22 +52,22 @@ function swatchesFor(product) {
   return out;
 }
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, variant = 'full', priority = false }) {
   const { addItem } = useCart();
-  const [fav, setFav] = useState(false);
   const [added, setAdded] = useState(false);
+  const min = variant === 'min';
 
   const img = product.images?.[0]?.url;
   // El Organizador marca el estado ("Agotada"); el catálogo viejo solo
   // tenía inventario. total_stock null = no se lleva inventario de esa pieza.
   const soldOut = product.sold_out ?? product.total_stock === 0;
   const lowStock = product.total_stock > 0 && product.total_stock <= 3;
-  const swatches = swatchesFor(product);
+  const swatches = min ? [] : swatchesFor(product);
 
   const badges = [];
-  if (product.is_featured && !soldOut) badges.push(['new', 'Nuevo']);
-  if (lowStock) badges.push(['last', 'Últimas piezas']);
   if (soldOut) badges.push(['soft', 'Agotado']);
+  else if (lowStock) badges.push(['last', 'Últimas piezas']);
+  else if (product.is_featured) badges.push(['new', 'Destacada']);
 
   function handleAdd(e) {
     e.preventDefault();
@@ -66,15 +79,16 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <Link className="pcard" href={`/producto/${product.slug}`}>
+    <Link className={`pcard${min ? ' pcard--min' : ''}`} href={`/producto/${product.slug}`}>
       <div className="pcard__media">
         {img ? (
           <Image
             src={img}
             alt={product.images?.[0]?.alt || product.name}
             fill
-            sizes="(max-width: 960px) 50vw, 25vw"
+            sizes={min ? '(max-width: 720px) 33vw, 20vw' : '(max-width: 720px) 50vw, 25vw'}
             className="pimg"
+            priority={priority}
           />
         ) : (
           <div className="imgph">{product.name}</div>
@@ -90,28 +104,19 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        <button
-          className={`pcard__fav${fav ? ' on' : ''}`}
-          aria-label="Guardar"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setFav((f) => !f);
-          }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9Z" strokeLinejoin="round" />
-          </svg>
-        </button>
-
-        <div
-          className="pcard__add"
-          role="button"
-          onClick={handleAdd}
-          style={soldOut ? { background: 'var(--sand)', color: 'var(--ink-60)' } : undefined}
-        >
-          {soldOut ? 'Avísame' : added ? '¡Agregado! ✓' : 'Agregar a la bolsa'}
-        </div>
+        {!min && (
+          <div
+            className="pcard__add"
+            role="button"
+            tabIndex={0}
+            onClick={handleAdd}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') handleAdd(e);
+            }}
+          >
+            {soldOut ? 'Avísame' : added ? 'Agregado ✓' : 'Agregar a la bolsa'}
+          </div>
+        )}
       </div>
 
       <div className="pcard__body">

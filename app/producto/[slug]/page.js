@@ -1,8 +1,10 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProductBySlug, getProducts, formatPrice } from '@/lib/products';
-import AddToCartButton from '@/components/AddToCartButton';
+import { getSiteContent } from '@/lib/site-content';
+import ProductGallery from '@/components/ProductGallery';
+import ProductBuy from '@/components/ProductBuy';
+import ProductCard from '@/components/ProductCard';
 
 // El catálogo se refresca solo cada minuto (lo que la dueña guarda
 // en el Organizador aparece aquí sin volver a desplegar).
@@ -24,16 +26,17 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const product = await getProductBySlug(params.slug);
+  const [product, all, content] = await Promise.all([
+    getProductBySlug(params.slug),
+    getProducts(),
+    getSiteContent(),
+  ]);
   if (!product) notFound();
 
-  const img = product.images?.[0]?.url;
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP || '5213331292868';
-  const waMessage = `Hola Taluna, me interesa la "${product.name}" (${formatPrice(
-    product.price,
-    product.currency
-  )}). ¿Sigue disponible?`;
-  const waHref = `https://wa.me/${phone}?text=${encodeURIComponent(waMessage)}`;
+  const { contacto } = content;
+  const priceLabel = formatPrice(product.price, product.currency);
+  const waMessage = `Hola Taluna, me interesa la "${product.name}" (${priceLabel}). ¿Sigue disponible?`;
+  const waHref = `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(waMessage)}`;
   const soldOut = product.sold_out ?? product.total_stock === 0;
 
   // Detalles de la ficha: los que trae el Organizador (color, tamaño,
@@ -45,86 +48,99 @@ export default async function ProductPage({ params }) {
         { label: 'Medidas', value: product.dimensions },
       ].filter((d) => d.value);
 
+  // Piezas que combinan: primero de la misma categoría.
+  const related = all
+    .filter((p) => p.slug !== product.slug)
+    .sort((a, b) => Number(b.category_slug === product.category_slug) - Number(a.category_slug === product.category_slug))
+    .slice(0, 5);
+
   return (
-    <div className="shell py-10">
-      <Link href="/catalogo" className="text-sm text-muted hover:text-ink">
-        ← Volver al catálogo
-      </Link>
+    <>
+      <div className="nav-space" />
 
-      <div className="mt-6 grid gap-10 md:grid-cols-2">
-        {/* Imagen */}
-        <div className="relative aspect-[4/5] overflow-hidden rounded-card border border-line bg-sand">
-          {img ? (
-            <Image
-              src={img}
-              alt={product.images?.[0]?.alt || product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-              priority
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted">Foto próximamente</div>
-          )}
-        </div>
+      <div className="wrap pdp" style={{ paddingTop: 12 }}>
+        <Link href="/catalogo" className="pdp__back">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 5 8 12 15 19" />
+          </svg>
+          Volver al catálogo
+        </Link>
 
-        {/* Info */}
-        <div>
-          <span className="text-sm uppercase tracking-wide text-muted">{product.category_name}</span>
-          <h1 className="mt-1 font-display text-4xl leading-tight text-ink">{product.name}</h1>
-          <p className="mt-4 text-2xl font-medium text-wine">
-            {formatPrice(product.price, product.currency)}
-          </p>
+        <div className="pdp__grid">
+          <ProductGallery images={product.images || []} name={product.name} />
 
-          {product.story && <p className="mt-6 leading-relaxed text-muted">{product.story}</p>}
+          <div>
+            {product.category_name && <span className="kicker">{product.category_name}</span>}
+            <h1 className="pdp__name">{product.name}</h1>
+            <p className="pdp__price">{priceLabel}</p>
 
-          {/* Variantes / disponibilidad */}
-          {product.variants?.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-ink">Disponibilidad</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {product.variants.map((v) => (
-                  <span
-                    key={v.sku || v.name}
-                    className={`rounded-full border px-3 py-1 text-sm ${
-                      v.stock > 0
-                        ? 'border-line text-ink'
-                        : 'border-line text-muted line-through opacity-60'
-                    }`}
-                  >
-                    {v.name} {v.stock > 0 ? `(${v.stock})` : '(agotado)'}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+            {(product.story || product.short_desc) && (
+              <p className="pdp__intro">{product.story || product.short_desc}</p>
+            )}
 
-          {/* CTA: agregar al carrito */}
-          <AddToCartButton product={product} soldOut={soldOut} />
-
-          {/* Alternativa: comprar directo por WhatsApp */}
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-block text-sm text-muted underline-offset-4 hover:text-ink hover:underline"
-          >
-            {soldOut ? 'Avísame cuando llegue por WhatsApp' : 'o cómpralo directo por WhatsApp'}
-          </a>
-
-          {/* Detalles */}
-          {details.length > 0 && (
-            <dl className="mt-10 divide-y divide-line border-t border-line text-sm">
-              {details.map((d) => (
-                <div key={d.label} className="flex justify-between py-3">
-                  <dt className="text-muted">{d.label}</dt>
-                  <dd className="max-w-[60%] text-right text-ink">{d.value}</dd>
+            {/* Variantes / disponibilidad */}
+            {product.variants?.length > 0 && (
+              <>
+                <span className="pdp__label">Disponibilidad</span>
+                <div className="pdp__variants">
+                  {product.variants.map((v) => (
+                    <span
+                      key={v.sku || v.name}
+                      className={`pdp__variant${v.stock > 0 ? '' : ' off'}`}
+                    >
+                      {v.name} {v.stock > 0 ? `· ${v.stock}` : '· agotado'}
+                    </span>
+                  ))}
                 </div>
-              ))}
-            </dl>
-          )}
+              </>
+            )}
+
+            <ProductBuy
+              product={product}
+              soldOut={soldOut}
+              priceLabel={priceLabel}
+              waHref={waHref}
+            />
+
+            {/* Detalles */}
+            {details.length > 0 && (
+              <dl className="pdp__specs">
+                {details.map((d) => (
+                  <div className="pdp__spec" key={d.label}>
+                    <dt>{d.label}</dt>
+                    <dd>{d.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Piezas que combinan */}
+      {related.length > 0 && (
+        <section className="section section--tight">
+          <div className="wrap">
+            <div className="sec-head">
+              <div className="sec-head__t">
+                <span className="kicker">También te puede gustar</span>
+                <h2 className="sec-title">
+                  Sigue <em>explorando.</em>
+                </h2>
+              </div>
+              <Link href="/catalogo" className="seelink">
+                Ver todo
+              </Link>
+            </div>
+
+            <div className="pgrid pgrid--compact">
+              {related.map((p) => (
+                <ProductCard key={p.slug} product={p} variant="min" />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 }

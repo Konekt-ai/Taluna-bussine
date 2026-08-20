@@ -56,19 +56,38 @@ En el Organizador, la sección **Tu página** deja a Taluna:
 
 - cambiar **textos, botones y fotos** de cada bloque del home;
 - **mover los bloques de lugar** (flechas ↑↓) y **ocultar** los que no quiera;
-- **agregar bloques nuevos**: un *aviso* (franja de promoción), *texto + imagen*
-  o una *galería de fotos*;
-- cambiar el **video o la foto de portada** (el video sube directo a Supabase
-  porque no cabe por las rutas del servidor);
+- **agregar bloques nuevos**: un *aviso* (franja de promoción), *texto + imagen*,
+  una *galería de fotos*, una *foto grande con texto* (bloque editorial) o la
+  *combinación del mes* (la foto panorámica con la bolsa recortada encima);
+- cambiar el **video o la foto de portada**, con una versión para computadora
+  (horizontal) y otra opcional para celular (vertical); el video sube directo a
+  Supabase porque no cabe por las rutas del servidor;
+- cambiar la **barra de hasta arriba** (el textito encima del logo);
 - editar **WhatsApp, correo, redes y mapa**, que alimentan el menú, el pie y
   todos los botones de WhatsApp del sitio;
-- editar el **encabezado del catálogo** y los textos del **pie de página**.
+- editar el **encabezado del catálogo** (incluida su foto de portada) y los
+  textos del **pie de página**.
 
 Lo que NO se puede tocar es el diseño (colores, tipografías, tamaños): así la
 página siempre se ve bien pase lo que pase.
 
+### La página reconoce el aparato
+
+Cada foto grande admite **dos versiones**: la de computadora (horizontal) y una
+opcional para **celular** (vertical). La página elige sola cuál poner:
+
+- las fotos las decide el propio navegador con `<picture>`, antes de pintar (no
+  hay parpadeo y no se descargan las dos);
+- el video de portada lo decide `components/HeroMedia.js`, así que un celular
+  nunca se baja el video pesado de computadora — y si el teléfono va en **ahorro
+  de datos** o el usuario pidió menos animación, se queda la foto de respaldo;
+- el **recorte** (qué tan alta o ancha se ve cada foto) cambia solo entre
+  celular, tablet y computadora con las variables `--ar-*` de
+  `app/globals.css`. Si algo se ve mal recortado, se ajusta ahí y cambia en toda
+  la página.
+
 En los títulos, un **salto de línea** parte el renglón y lo que va `*entre
-asteriscos*` sale en cursiva (el acento vino de la marca).
+asteriscos*` sale en el color de la marca (el café Taluna).
 
 ### Encenderlo (una sola vez)
 
@@ -146,8 +165,8 @@ bucket `studio`. Esta tienda las toma de ahí (ver sección 2). Las tablas
 
 | Quiero cambiar...            | Archivo |
 |------------------------------|---------|
-| Colores / marca              | `app/globals.css` (variables `--color-*`) y `tailwind.config.js` |
-| Tipografías                  | `app/layout.js` (link de fuentes) + `app/globals.css` |
+| Colores / marca              | `app/globals.css` (bloque `:root` de arriba: `--ivory`, `--ink`, `--accent`…) y `tailwind.config.js` |
+| Tipografías                  | `app/layout.js` (link de Google Fonts: **Figtree**) + `--font-body` / `--font-display` en `app/globals.css` |
 | Textos del home              | `app/page.js` |
 | Estructura de la base datos  | `supabase/schema.sql` |
 | Qué se publica y cómo se ve el catálogo del Organizador | `supabase/studio-catalog.sql` y `lib/studio.js` |
