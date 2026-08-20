@@ -35,6 +35,12 @@ const IconBag = () => (
   </svg>
 );
 
+const IconHeart = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8a4.3 4.3 0 0 1 8.5-1 4.3 4.3 0 0 1 8.5 1C20.5 15 12 20.5 12 20.5z" />
+  </svg>
+);
+
 const IconWa = () => (
   <svg viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7s-3.7-3.2-3.8-3.4c-.1-.2-.9-1.2-.9-2.3s.6-1.6.8-1.8c.2-.2.4-.3.6-.3h.4c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.5c-.1.2-.3.3-.1.6.1.3.7 1.1 1.4 1.7.9.8 1.6 1 1.9 1.2.2.1.4 0 .5-.1l.6-.7c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.5.3 0 .1 0 .6-.2 1.1Z" />
@@ -43,7 +49,7 @@ const IconWa = () => (
 
 export default function Nav({ contacto, categories = [], announcement }) {
   const pathname = usePathname();
-  const { count } = useCart();
+  const { count, favCount, openDrawer } = useCart();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -64,8 +70,8 @@ export default function Nav({ contacto, categories = [], announcement }) {
     return [
       { label: 'Catálogo', href: '/catalogo' },
       ...cats,
+      { label: 'Arma tu Taluna', href: '/arma-tu-taluna', accent: true },
       { label: 'Historia', href: '/#historia' },
-      { label: 'Contacto', href: '/#contacto', accent: true },
     ];
   }, [categories]);
 
@@ -136,13 +142,26 @@ export default function Nav({ contacto, categories = [], announcement }) {
               <IconSearch />
             </button>
 
-            <Link href="/carrito" className="icon-btn" aria-label={`Bolsa (${count} artículos)`}>
+            <button
+              className="icon-btn"
+              onClick={() => openDrawer('favs')}
+              aria-label={`Favoritos (${favCount})`}
+            >
+              <IconHeart />
+              {favCount > 0 && <span className="cart-count cart-count--fav">{favCount}</span>}
+            </button>
+
+            <button
+              className="icon-btn"
+              onClick={() => openDrawer('cart')}
+              aria-label={`Tu bolsa (${count} artículos)`}
+            >
               <IconBag />
               {count > 0 && <span className="cart-count">{count}</span>}
-            </Link>
+            </button>
 
             <a
-              className="icon-btn"
+              className="icon-btn nav__wa"
               href={waHref}
               target="_blank"
               rel="noopener noreferrer"

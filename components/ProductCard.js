@@ -53,8 +53,9 @@ function swatchesFor(product) {
 }
 
 export default function ProductCard({ product, variant = 'full', priority = false }) {
-  const { addItem } = useCart();
+  const { addItem, isFav, toggleFav } = useCart();
   const [added, setAdded] = useState(false);
+  const fav = isFav(product.slug);
   const min = variant === 'min';
 
   const img = product.images?.[0]?.url;
@@ -103,6 +104,22 @@ export default function ProductCard({ product, variant = 'full', priority = fals
             ))}
           </div>
         )}
+
+        {/* Guardar en favoritos, como en el diseño */}
+        <button
+          className={`round-btn pcard__fav${fav ? ' on' : ''}`}
+          aria-label={fav ? `Quitar ${product.name} de favoritos` : `Guardar ${product.name}`}
+          aria-pressed={fav}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFav(product);
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8a4.3 4.3 0 0 1 8.5-1 4.3 4.3 0 0 1 8.5 1C20.5 15 12 20.5 12 20.5z" />
+          </svg>
+        </button>
 
         {!min && (
           <div

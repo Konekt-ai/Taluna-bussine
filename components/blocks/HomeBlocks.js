@@ -2,6 +2,8 @@ import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import Pic from '@/components/Pic';
 import HeroMedia from '@/components/HeroMedia';
+import ModelTabs from '@/components/ModelTabs';
+import BuilderTeaser from '@/components/BuilderTeaser';
 import RichText, { plainText } from './RichText';
 import { hrefFor, isExternal } from '@/lib/site-content';
 
@@ -191,13 +193,63 @@ function EditorialBox({ b, ctx, alt }) {
   );
 }
 
+/* ========== CAMPAÑA · texto a la izquierda, cápsula a la derecha ========== */
 function Craft({ b, ctx }) {
+  // Acepta foto o video: si la dueña subió video, se reproduce en la cápsula.
+  const media = b.media || {};
+  const esVideo = media.type === 'video' && media.src;
+  const foto = media.type === 'image' ? media.image || b.image : b.image;
+  const fotoMovil = media.type === 'image' ? media.imageMobile || b.imageMobile : b.imageMobile;
+
   return (
-    <EditorialBox
-      b={b}
-      ctx={ctx}
-      alt="Straps de chaquira tejida a mano con detalles de piel y herrajes de latón"
-    />
+    <section className="section campaign">
+      <div className="wrap campaign__grid">
+        <div className="campaign__body reveal">
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title">
+            <RichText text={b.title} />
+          </h2>
+          {b.text && <p className="lead">{b.text}</p>}
+
+          {(b.chips || []).filter(Boolean).length > 0 && (
+            <div className="campaign__chips">
+              {(b.chips || []).filter(Boolean).map((c, i) => (
+                <span className="campaign__chip" key={i}>
+                  {c}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <Cta cta={b.cta} contacto={ctx.contacto} className="ulink">
+            {arrow}
+          </Cta>
+        </div>
+
+        <div className="campaign__media reveal" data-d="1">
+          {esVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={media.poster || undefined}
+              aria-hidden="true"
+            >
+              <source src={media.src} type="video/mp4" />
+            </video>
+          ) : (
+            <Pic
+              src={foto}
+              mobile={fotoMovil}
+              alt="Straps de chaquira tejida a mano"
+              fallback={<div className="imgph">{plainText(b.title)}</div>}
+            />
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -250,46 +302,32 @@ function Combinacion({ b, ctx }) {
   );
 }
 
-/* ===================== CATEGORÍAS ===================== */
+/* =============== MODELOS TALUNA (pestañas por modelo) =============== */
 function Categorias({ b, ctx }) {
-  const { categories, coverFor } = ctx;
-  if (!categories.length) return null;
-  // Con dos categorías se ven mejor del mismo tamaño, a media pantalla.
-  const few = categories.length <= 2;
+  const { products, categories } = ctx;
+  // Los modelos son los productos de una categoría (por defecto, la primera:
+  // normalmente "Bolsas"). La dueña puede apuntar a otra desde el Organizador.
+  const slug = b.categoria || categories[0]?.slug;
+  const modelos = products.filter((p) => p.category_slug === slug).slice(0, 8);
+  if (!modelos.length) return null;
 
   return (
     <section className="section" id="categorias">
       <div className="wrap">
-        <SecHead b={b} ctx={ctx} link />
+        <div className="sec-head">
+          <div className="sec-head__t reveal">
+            {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+            <h2 className="sec-title">
+              <RichText text={b.title} />
+            </h2>
+          </div>
+          <Cta cta={b.cta} contacto={ctx.contacto} className="seelink reveal">
+            {arrowUp}
+          </Cta>
+        </div>
 
-        <div className={`collections${few ? ' collections--few' : ''}`} data-stagger>
-          {categories.map((c, i) => {
-            const cover = coverFor(c.slug);
-            // La primera categoría manda: ocupa el doble de ancho.
-            return (
-              <Link
-                className={`col-tile reveal${!few && i === 0 ? ' col-tile--xl' : ''}`}
-                href={`/catalogo?c=${c.slug}`}
-                key={c.slug}
-              >
-                <div className="col-tile__box">
-                  {cover ? (
-                    <img className="col-tile__img" src={cover} alt={c.name} loading="lazy" />
-                  ) : (
-                    <div className="imgph">{c.name}</div>
-                  )}
-                  <div className="col-tile__overlay" />
-                  <div className="col-tile__body">
-                    <div className="col-tile__name">{c.name}</div>
-                    <span className="col-tile__cta">
-                      {i === 0 ? 'Ver colección' : 'Explorar'}
-                      {arrow}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="reveal">
+          <ModelTabs models={modelos} />
         </div>
       </div>
     </section>
@@ -522,6 +560,31 @@ function Contacto({ b, ctx }) {
   );
 }
 
+/* ===================== ARMA TU TALUNA ===================== */
+function ArmaTuTaluna({ b, ctx }) {
+  return (
+    <section className="section section--tight" id="arma-tu-taluna">
+      <div className="wrap">
+        <div className="ig-head reveal">
+          {b.eyebrow && <span className="kicker">{b.eyebrow}</span>}
+          <h2 className="sec-title">
+            <RichText text={b.title} />
+          </h2>
+          {b.lead && <p className="lead" style={{ margin: '12px auto 0' }}>{b.lead}</p>}
+        </div>
+
+        <div className="reveal" data-d="1">
+          <BuilderTeaser
+            products={ctx.products}
+            categories={ctx.categories}
+            contacto={ctx.contacto}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ============ BLOQUES QUE LA DUEÑA PUEDE AGREGAR ============ */
 
 // Franja de aviso: promociones, envíos, avisos de temporada.
@@ -598,6 +661,7 @@ function Galeria({ b }) {
 
 export const BLOCKS = {
   hero: Hero,
+  armaTuTaluna: ArmaTuTaluna,
   craft: Craft,
   categorias: Categorias,
   destacados: Destacados,

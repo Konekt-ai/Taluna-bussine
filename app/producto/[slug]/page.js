@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getProducts, formatPrice } from '@/lib/products';
+import { getProductBySlug, getProducts, getCategories } from '@/lib/products';
 import { getSiteContent } from '@/lib/site-content';
-import ProductGallery from '@/components/ProductGallery';
-import ProductBuy from '@/components/ProductBuy';
+import ProductDetail from '@/components/ProductDetail';
 import ProductCard from '@/components/ProductCard';
 
 // El catálogo se refresca solo cada minuto (lo que la dueña guarda
@@ -26,96 +25,48 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const [product, all, content] = await Promise.all([
+  const [product, all, categories, content] = await Promise.all([
     getProductBySlug(params.slug),
     getProducts(),
+    getCategories(),
     getSiteContent(),
   ]);
   if (!product) notFound();
 
-  const { contacto } = content;
-  const priceLabel = formatPrice(product.price, product.currency);
-  const waMessage = `Hola Taluna, me interesa la "${product.name}" (${priceLabel}). ¿Sigue disponible?`;
-  const waHref = `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(waMessage)}`;
-  const soldOut = product.sold_out ?? product.total_stock === 0;
+  // La segunda categoría del catálogo son los straps (la primera, las bolsas).
+  const strapsSlug = categories[1]?.slug;
+  const esStrap = strapsSlug && product.category_slug === strapsSlug;
+  const straps = esStrap ? [] : all.filter((p) => p.category_slug === strapsSlug);
 
-  // Detalles de la ficha: los que trae el Organizador (color, tamaño,
-  // medidas, herrajes…) o, si viene del catálogo viejo, los de siempre.
-  const details = product.details?.length
-    ? product.details
-    : [
-        { label: 'Materiales', value: product.materials },
-        { label: 'Medidas', value: product.dimensions },
-      ].filter((d) => d.value);
-
-  // Piezas que combinan: primero de la misma categoría.
+  // Piezas que combinan: primero las de la misma categoría.
   const related = all
     .filter((p) => p.slug !== product.slug)
-    .sort((a, b) => Number(b.category_slug === product.category_slug) - Number(a.category_slug === product.category_slug))
+    .sort(
+      (a, b) =>
+        Number(b.category_slug === product.category_slug) -
+        Number(a.category_slug === product.category_slug)
+    )
     .slice(0, 5);
 
   return (
     <>
       <div className="nav-space" />
 
-      <div className="wrap pdp" style={{ paddingTop: 12 }}>
+      <div className="wrap">
         <Link href="/catalogo" className="pdp__back">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 5 8 12 15 19" />
           </svg>
           Volver al catálogo
         </Link>
-
-        <div className="pdp__grid">
-          <ProductGallery images={product.images || []} name={product.name} />
-
-          <div>
-            {product.category_name && <span className="kicker">{product.category_name}</span>}
-            <h1 className="pdp__name">{product.name}</h1>
-            <p className="pdp__price">{priceLabel}</p>
-
-            {(product.story || product.short_desc) && (
-              <p className="pdp__intro">{product.story || product.short_desc}</p>
-            )}
-
-            {/* Variantes / disponibilidad */}
-            {product.variants?.length > 0 && (
-              <>
-                <span className="pdp__label">Disponibilidad</span>
-                <div className="pdp__variants">
-                  {product.variants.map((v) => (
-                    <span
-                      key={v.sku || v.name}
-                      className={`pdp__variant${v.stock > 0 ? '' : ' off'}`}
-                    >
-                      {v.name} {v.stock > 0 ? `· ${v.stock}` : '· agotado'}
-                    </span>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <ProductBuy
-              product={product}
-              soldOut={soldOut}
-              priceLabel={priceLabel}
-              waHref={waHref}
-            />
-
-            {/* Detalles */}
-            {details.length > 0 && (
-              <dl className="pdp__specs">
-                {details.map((d) => (
-                  <div className="pdp__spec" key={d.label}>
-                    <dt>{d.label}</dt>
-                    <dd>{d.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </div>
-        </div>
       </div>
+
+      <ProductDetail
+        product={product}
+        straps={straps}
+        esStrap={Boolean(esStrap)}
+        waPhone={content.contacto.whatsapp}
+      />
 
       {/* Piezas que combinan */}
       {related.length > 0 && (

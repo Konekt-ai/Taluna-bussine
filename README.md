@@ -59,6 +59,8 @@ En el Organizador, la sección **Tu página** deja a Taluna:
 - **agregar bloques nuevos**: un *aviso* (franja de promoción), *texto + imagen*,
   una *galería de fotos*, una *foto grande con texto* (bloque editorial) o la
   *combinación del mes* (la foto panorámica con la bolsa recortada encima);
+- prender o apagar el **aviso de novedades** que sale al entrar, con su foto y
+  sus textos;
 - cambiar el **video o la foto de portada**, con una versión para computadora
   (horizontal) y otra opcional para celular (vertical); el video sube directo a
   Supabase porque no cabe por las rutas del servidor;
@@ -70,6 +72,25 @@ En el Organizador, la sección **Tu página** deja a Taluna:
 
 Lo que NO se puede tocar es el diseño (colores, tipografías, tamaños): así la
 página siempre se ve bien pase lo que pase.
+
+### Cómo se arma "Arma tu Taluna"
+
+El configurador (y el paso "elige tu strap" de la ficha) **no tiene datos
+propios**: sale del catálogo. La convención es:
+
+| En el configurador | De dónde sale |
+|---|---|
+| Las bolsas | Los productos de la **primera** categoría del catálogo |
+| Los straps | Los productos de la **segunda** categoría |
+| Los colores de la bolsa | Las **variantes** de ese producto (Negra, Camel…) |
+| El largo del strap | Las **variantes** del strap (Corto, Mediano, Largo) |
+
+Por eso conviene que en el Organizador las categorías estén en ese orden
+(Bolsas primero, Straps después) y que las variantes de un strap se llamen por
+su largo. Si una variante se queda sin existencias, deja de poder elegirse.
+
+Si todavía no hay straps publicados, la bolsa se puede pedir sola: el botón
+cambia a "Agregar solo la bolsa" y nada se bloquea.
 
 ### La página reconoce el aparato
 

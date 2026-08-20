@@ -4,6 +4,8 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { CartProvider } from '@/components/CartContext';
+import Drawers from '@/components/Drawers';
+import NewsletterPopup from '@/components/NewsletterPopup';
 import { getSiteContent } from '@/lib/site-content';
 import { getCategories } from '@/lib/products';
 
@@ -23,7 +25,7 @@ export const viewport = {
 };
 
 export default async function RootLayout({ children }) {
-  const [{ contacto, footer, header }, categories] = await Promise.all([
+  const [{ contacto, footer, header, popup }, categories] = await Promise.all([
     getSiteContent(),
     getCategories(),
   ]);
@@ -46,6 +48,15 @@ export default async function RootLayout({ children }) {
           <Nav contacto={contacto} categories={categories} announcement={header?.announcement} />
           <main>{children}</main>
           <Footer contacto={contacto} texts={footer} categories={categories} />
+          <Drawers />
+          {popup?.on !== false && (
+            <NewsletterPopup
+              image={popup?.image}
+              texto={popup?.text}
+              titulo={popup?.title}
+              waPhone={contacto.whatsapp}
+            />
+          )}
           <WhatsAppButton phone={contacto.whatsapp} />
           <ScrollReveal />
         </CartProvider>
