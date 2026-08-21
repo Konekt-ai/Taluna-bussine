@@ -6,9 +6,9 @@ import { useCart } from './CartContext';
 
 // =====================================================================
 //  MODELOS TALUNA
-//  Pestañas por modelo, como en el diseño: a la izquierda la foto de
-//  ambiente y a la derecha la pieza sobre fondo crema, con sus colores
-//  y el botón + para echarla a la bolsa.
+//  Porte fiel de ModelosTaluna (src/routes/index.tsx): pestañas por
+//  modelo, foto de ambiente a la izquierda y la pieza a la derecha con
+//  sus colores y el botón +.
 //  Los modelos son los productos reales del catálogo.
 // =====================================================================
 
@@ -54,29 +54,26 @@ export default function ModelTabs({ models = [] }) {
   const { addItem } = useCart();
   const [i, setI] = useState(0);
   const [colorIdx, setColorIdx] = useState(0);
-  const [added, setAdded] = useState(false);
 
   if (!models.length) return null;
 
   const p = models[Math.min(i, models.length - 1)];
   const colores = coloresDe(p);
-  // La segunda foto suele ser la de ambiente; si no hay, se repite la primera.
   const ambiente = p.images?.[1]?.url || p.images?.[0]?.url;
   const pieza = p.images?.[0]?.url;
 
   return (
     <>
-      <div className="rail modelos__tabs" role="tablist">
+      <div className="tl-mod__tabs tl-scroll" role="tablist">
         {models.map((m, idx) => (
           <button
             key={m.slug}
             role="tab"
             aria-selected={idx === i}
-            className={`modelos__tab${idx === i ? ' is-active' : ''}`}
+            className={`tl-mod__tab${idx === i ? ' on' : ''}`}
             onClick={() => {
               setI(idx);
               setColorIdx(0);
-              setAdded(false);
             }}
           >
             {m.name.replace(/^bolsa\s+/i, '')}
@@ -84,39 +81,27 @@ export default function ModelTabs({ models = [] }) {
         ))}
       </div>
 
-      <div className="modelos__grid">
-        <Link href={`/producto/${p.slug}`} className="modelos__life">
-          {ambiente ? (
-            <img src={ambiente} alt={p.name} loading="lazy" />
-          ) : (
-            <div className="imgph">{p.name}</div>
-          )}
+      <div className="tl-mod__grid" data-stagger>
+        <Link href={`/producto/${p.slug}`} className="tl-mod__life reveal">
+          {ambiente ? <img src={ambiente} alt={p.name} loading="lazy" /> : <span className="tl-ph">{p.name}</span>}
         </Link>
 
-        <div className="modelos__side">
-          <div className="modelos__pieza">
+        <div className="reveal" data-d="1">
+          <div className="tl-mod__pieza">
             <Link href={`/producto/${p.slug}`} aria-label={`Ver ${p.name}`}>
-              {pieza ? (
-                <img src={pieza} alt={p.name} loading="lazy" />
-              ) : (
-                <div className="imgph">{p.name}</div>
-              )}
+              {pieza ? <img src={pieza} alt={p.name} loading="lazy" /> : <span className="tl-ph">{p.name}</span>}
             </Link>
 
             <button
-              className="modelos__add"
-              aria-label={`Agregar ${p.name} a la bolsa`}
-              onClick={() => {
-                addItem(p);
-                setAdded(true);
-                setTimeout(() => setAdded(false), 1800);
-              }}
+              className="tl-mod__plus"
+              aria-label={`Agregar ${p.name} al carrito`}
+              onClick={() => addItem(p)}
             >
-              {added ? '✓' : '+'}
+              +
             </button>
 
             {colores.length > 0 && (
-              <div className="modelos__colores">
+              <div className="tl-mod__colors">
                 {colores.map((c, idx) => (
                   <button
                     key={c.hex}
@@ -131,11 +116,8 @@ export default function ModelTabs({ models = [] }) {
             )}
           </div>
 
-          <p className="modelos__nombre">{p.name}</p>
-          <p className="modelos__precio">
-            {precio(p.price, p.currency)}
-            {colores[colorIdx] && <span> · {colores[colorIdx].name}</span>}
-          </p>
+          <p className="tl-mod__name">{p.name}</p>
+          <p className="tl-mod__price">{precio(p.price, p.currency)}</p>
         </div>
       </div>
     </>

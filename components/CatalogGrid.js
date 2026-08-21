@@ -5,11 +5,8 @@ import ProductCard from './ProductCard';
 
 // =====================================================================
 //  CUADRÍCULA DEL CATÁLOGO
-//  Filtros editoriales (subrayados, en mayúsculas) como en el diseño.
-//  Entiende ?c=categoria y ?q=busqueda para que el menú y el buscador del
-//  encabezado lleguen directo a lo que se pidió. La dirección se lee ya
-//  en el navegador, así el catálogo completo sigue viajando en el HTML
-//  (bueno para Google y para que no haya parpadeo).
+//  Filtros editoriales subrayados + rejilla de dos, como en el diseño
+//  (categoria.$slug.tsx). Entiende ?c=categoria y ?q=busqueda.
 // =====================================================================
 
 const ORDENES = [
@@ -23,7 +20,6 @@ export default function CatalogGrid({ products, categories }) {
   const [query, setQuery] = useState('');
   const [orden, setOrden] = useState('destacado');
 
-  // Lee ?c= y ?q= de la dirección (y también cuando se cambia de enlace).
   useEffect(() => {
     const read = () => {
       const p = new URLSearchParams(window.location.search);
@@ -34,6 +30,9 @@ export default function CatalogGrid({ products, categories }) {
     window.addEventListener('popstate', read);
     return () => window.removeEventListener('popstate', read);
   }, []);
+
+  // La segunda categoría son los straps: sus fichas llevan otro trato.
+  const strapsSlug = categories[1]?.slug;
 
   const filtered = useMemo(() => {
     let list = products;
@@ -53,53 +52,46 @@ export default function CatalogGrid({ products, categories }) {
   const pills = [{ slug: 'todos', name: 'Todas' }, ...categories];
 
   return (
-    <div>
-      {/* Categorías */}
-      <div className="filters">
+    <>
+      <div className="tl-filters tl-scroll">
         {pills.map((c) => (
           <button
             key={c.slug}
             onClick={() => setActive(c.slug)}
-            className={`chip${active === c.slug ? ' is-active' : ''}`}
+            className={`tl-filter${active === c.slug ? ' on' : ''}`}
           >
             {c.name}
           </button>
         ))}
       </div>
 
-      {/* Orden */}
-      <div className="filters" style={{ borderBottom: 'none', paddingBottom: 22 }}>
+      <div className="tl-filters tl-scroll" style={{ borderBottom: 'none', paddingBottom: 4 }}>
         {ORDENES.map(([id, label]) => (
           <button
             key={id}
             onClick={() => setOrden(id)}
-            className={`chip${orden === id ? ' is-active' : ''}`}
+            className={`tl-filter${orden === id ? ' on' : ''}`}
           >
             {label}
           </button>
         ))}
       </div>
 
-      {query && (
-        <p className="lead" style={{ marginBottom: 22 }}>
-          Resultados para <strong style={{ color: 'var(--ink)' }}>{query}</strong> ·{' '}
-          {filtered.length} {filtered.length === 1 ? 'pieza' : 'piezas'}
-        </p>
-      )}
-
       {filtered.length === 0 ? (
-        <p className="empty-note">
+        <p className="tl-empty">
           {query
             ? 'No encontramos piezas con esa búsqueda. Escríbenos por WhatsApp y te ayudamos.'
             : 'No hay productos en esta categoría todavía.'}
         </p>
       ) : (
-        <div className="pgrid" data-stagger>
-          {filtered.map((p, i) => (
-            <ProductCard key={p.slug} product={p} priority={i < 4} />
+        <section className="tl-cat__grid" data-stagger>
+          {filtered.map((p) => (
+            <div className="reveal" key={p.slug}>
+              <ProductCard product={p} esStrap={p.category_slug === strapsSlug} />
+            </div>
           ))}
-        </div>
+        </section>
       )}
-    </div>
+    </>
   );
 }

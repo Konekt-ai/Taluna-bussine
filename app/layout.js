@@ -14,9 +14,9 @@ import { getCategories } from '@/lib/products';
 export const revalidate = 60;
 
 export const metadata = {
-  title: 'Taluna · Bolsas artesanales hechas en México',
+  title: 'Taluna · Bolsas artesanales que se adaptan a tu estilo',
   description:
-    'Bolsas y straps de piel hechos a mano en México. Piezas personalizables: elige tu bolsa, tu color y tu strap.',
+    'Bolsas de piel hechas a mano en México con straps intercambiables. Elige tu bolsa, color y strap y arma tu Taluna.',
   icons: { icon: '/favicon.png' },
 };
 
@@ -33,9 +33,8 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="es">
       <head>
-        {/* Figtree es la tipografía del diseño aprobado: una sola familia,
-            de 300 a 700. Para cambiarla, ajusta este link y las variables
-            --font-body / --font-display en app/globals.css */}
+        {/* Figtree es la tipografía del diseño. Para cambiarla, ajusta este
+            link y la variable --tl-ff en app/globals.css */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -45,20 +44,23 @@ export default async function RootLayout({ children }) {
       </head>
       <body>
         <CartProvider>
-          <Nav contacto={contacto} categories={categories} announcement={header?.announcement} />
-          <main>{children}</main>
-          <Footer contacto={contacto} texts={footer} categories={categories} />
-          <Drawers />
-          {popup?.on !== false && (
-            <NewsletterPopup
-              image={popup?.image}
-              texto={popup?.text}
-              titulo={popup?.title}
-              waPhone={contacto.whatsapp}
-            />
-          )}
-          <WhatsAppButton phone={contacto.whatsapp} />
-          <ScrollReveal />
+          {/* La columna del diseño: 480 px centrados, también en escritorio */}
+          <div className="tl-shell">
+            <Nav contacto={contacto} categories={categories} announcement={header?.announcement} />
+            <main>{children}</main>
+            <Footer contacto={contacto} texts={footer} categories={categories} />
+            <Drawers />
+            {popup?.on !== false && (
+              <NewsletterPopup
+                image={popup?.image}
+                texto={popup?.text}
+                titulo={popup?.title}
+                waPhone={contacto.whatsapp}
+              />
+            )}
+            <WhatsAppButton phone={contacto.whatsapp} />
+            <ScrollReveal />
+          </div>
         </CartProvider>
       </body>
     </html>

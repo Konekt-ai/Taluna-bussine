@@ -8,12 +8,16 @@ import { site } from '@/lib/site';
 
 // =====================================================================
 //  ENCABEZADO
-//  Igual que el diseño aprobado: barra de aviso arriba, logo al centro,
-//  menú de categorías debajo. Sobre la portada se ve transparente (logo
-//  blanco) y al bajar se vuelve vidrio esmerilado (logo oscuro).
+//  Porte fiel del diseño (Artisan Migration · src/routes/index.tsx y
+//  src/components/taluna/Header.tsx):
+//    · barra de aviso de 34 px
+//    · fila de 62 px: menú | logo | buscar · favoritos · bolsa
+//    · navegación horizontal de categorías, que se recoge al bajar
+//  Sobre la portada va transparente con logo blanco; al bajar se vuelve
+//  vidrio esmerilado con logo oscuro.
 // =====================================================================
 
-const IconMenu = () => (
+const Menu = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
     <line x1="3" y1="7" x2="21" y2="7" />
     <line x1="3" y1="13" x2="21" y2="13" />
@@ -21,66 +25,65 @@ const IconMenu = () => (
   </svg>
 );
 
-const IconSearch = () => (
+const Search = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
     <circle cx="11" cy="11" r="7" />
     <line x1="16.5" y1="16.5" x2="21" y2="21" />
   </svg>
 );
 
-const IconBag = () => (
+const Heart = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8a4.3 4.3 0 0 1 8.5-1 4.3 4.3 0 0 1 8.5 1C20.5 15 12 20.5 12 20.5z" />
+  </svg>
+);
+
+const Bag = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6 8h12l-1 12H7L6 8z" />
     <path d="M9 8V6a3 3 0 0 1 6 0v2" />
   </svg>
 );
 
-const IconHeart = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8a4.3 4.3 0 0 1 8.5-1 4.3 4.3 0 0 1 8.5 1C20.5 15 12 20.5 12 20.5z" />
+const Chevron = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="9 6 15 12 9 18" />
   </svg>
 );
 
-const IconWa = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7s-3.7-3.2-3.8-3.4c-.1-.2-.9-1.2-.9-2.3s.6-1.6.8-1.8c.2-.2.4-.3.6-.3h.4c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.5c-.1.2-.3.3-.1.6.1.3.7 1.1 1.4 1.7.9.8 1.6 1 1.9 1.2.2.1.4 0 .5-.1l.6-.7c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.5.3 0 .1 0 .6-.2 1.1Z" />
+const Close = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+    <line x1="5" y1="5" x2="19" y2="19" />
+    <line x1="19" y1="5" x2="5" y2="19" />
   </svg>
 );
 
 export default function Nav({ contacto, categories = [], announcement }) {
   const pathname = usePathname();
   const { count, favCount, openDrawer } = useCart();
-  const [open, setOpen] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  // Empezamos suponiendo portada en el inicio; el efecto lo confirma.
   const [overHero, setOverHero] = useState(pathname === '/');
 
-  // El número lo edita la dueña desde el Organizador; site.js es el respaldo.
   const waHref = `https://wa.me/${contacto?.whatsapp || site.whatsapp}?text=${encodeURIComponent(
     'Hola Taluna, me gustaría hacer un pedido.'
   )}`;
 
-  // Menú: catálogo + las categorías reales del catálogo + marca.
+  // Menú de categorías: las reales del catálogo + Arma tu Taluna.
   const links = useMemo(() => {
-    const cats = (categories || []).slice(0, 5).map((c) => ({
+    const cats = (categories || []).slice(0, 4).map((c) => ({
       label: c.name,
       href: `/catalogo?c=${c.slug}`,
     }));
-    return [
-      { label: 'Catálogo', href: '/catalogo' },
-      ...cats,
-      { label: 'Arma tu Taluna', href: '/arma-tu-taluna', accent: true },
-      { label: 'Historia', href: '/#historia' },
-    ];
+    return [...cats, { label: 'Arma tu Taluna', href: '/arma-tu-taluna', accent: true }];
   }, [categories]);
 
-  // ¿Hay portada a pantalla completa en esta página? Si la hay, el
-  // encabezado va transparente encima de ella.
+  // ¿Esta página lleva portada a pantalla completa?
   useEffect(() => {
     setOverHero(!!document.querySelector('[data-hero]'));
     setSearchOpen(false);
-    setOpen(false);
+    setMenu(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -90,175 +93,139 @@ export default function Nav({ contacto, categories = [], announcement }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Bloquea el scroll del fondo mientras el menú está abierto.
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    document.body.style.overflow = menu ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [open]);
+  }, [menu]);
 
-  const solid = !overHero || scrolled || searchOpen || open;
-  const aviso = announcement || 'Envíos a todo México · Hecho a mano en México';
+  const solid = scrolled || searchOpen || menu || !overHero;
+  const aviso = announcement || 'Envío gratis desde $1,500 · Hecho a mano en México';
 
   return (
     <>
-      <header
-        className={`nav${solid ? ' solid' : ''}${overHero ? ' over' : ''}${
-          scrolled ? ' scrolled' : ''
-        }`}
+      <div
+        className={`tl-fixed tl-hd${solid ? ' solid' : ''}${overHero ? '' : ' plain'}`}
         id="nav"
       >
-        <div className="nav__scrim" aria-hidden="true" />
+        {overHero && <div className="tl-hd__scrim" aria-hidden="true" />}
 
-        <div className="nav__ann">{aviso}</div>
-
-        <div className="nav__bar">
-          <div className="nav__left">
-            <button
-              className="icon-btn nav__burger"
-              aria-label="Menú"
-              onClick={() => setOpen(true)}
-            >
-              <IconMenu />
-            </button>
-          </div>
-
-          <Link className="brand" href="/" aria-label="Taluna MX — inicio">
-            <img
-              className="brand__logo"
-              src={solid ? '/logo-taluna-dark.png' : '/logo-taluna-light.png'}
-              alt="Taluna MX"
-            />
-          </Link>
-
-          <div className="nav__right">
-            <button
-              className="icon-btn"
-              aria-label="Buscar"
-              aria-expanded={searchOpen}
-              onClick={() => setSearchOpen((s) => !s)}
-            >
-              <IconSearch />
-            </button>
-
-            <button
-              className="icon-btn"
-              onClick={() => openDrawer('favs')}
-              aria-label={`Favoritos (${favCount})`}
-            >
-              <IconHeart />
-              {favCount > 0 && <span className="cart-count cart-count--fav">{favCount}</span>}
-            </button>
-
-            <button
-              className="icon-btn"
-              onClick={() => openDrawer('cart')}
-              aria-label={`Tu bolsa (${count} artículos)`}
-            >
-              <IconBag />
-              {count > 0 && <span className="cart-count">{count}</span>}
-            </button>
-
-            <a
-              className="icon-btn nav__wa"
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Pedir por WhatsApp"
-            >
-              <IconWa />
-            </a>
-          </div>
+        <div className="tl-ann">
+          <p>{aviso}</p>
         </div>
 
-        <nav className="nav__links" aria-label="Categorías">
-          {links.map((l) => (
-            <Link
-              key={l.label}
-              className={`nav__link${l.accent ? ' is-accent' : ''}${
-                pathname === l.href ? ' is-active' : ''
-              }`}
-              href={l.href}
-            >
-              {l.label}
+        <header>
+          <div className="tl-hd__bar">
+            <div className="tl-hd__left">
+              <button className="tl-ic tl-ic--menu" aria-label="Menú" onClick={() => setMenu(true)}>
+                <Menu />
+              </button>
+            </div>
+
+            <Link className="tl-hd__logo" href="/" aria-label="Taluna MX — inicio">
+              <img
+                src={solid ? '/logo-taluna-dark.png' : '/logo-taluna-light.png'}
+                alt="Taluna MX"
+              />
             </Link>
-          ))}
-        </nav>
+
+            <div className="tl-hd__right">
+              <button
+                className="tl-ic"
+                aria-label="Buscar"
+                aria-expanded={searchOpen}
+                onClick={() => setSearchOpen((s) => !s)}
+              >
+                <Search />
+              </button>
+
+              <button
+                className="tl-ic"
+                aria-label={`Favoritos (${favCount})`}
+                onClick={() => openDrawer('favs')}
+              >
+                <Heart />
+                {favCount > 0 && <span className="tl-badge tl-badge--fav">{favCount}</span>}
+              </button>
+
+              <button
+                className="tl-ic"
+                aria-label={`Carrito (${count})`}
+                onClick={() => openDrawer('cart')}
+              >
+                <Bag />
+                {count > 0 && <span className="tl-badge">{count}</span>}
+              </button>
+            </div>
+          </div>
+
+          {/* Navegación horizontal (se recoge al bajar) */}
+          <nav className="tl-hd__nav tl-scroll" aria-label="Categorías">
+            {links.map((l) => (
+              <Link key={l.label} href={l.href} className={l.accent ? 'accent' : undefined}>
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+        </header>
 
         {searchOpen && (
-          <div className="nav__search">
+          <div className="tl-search">
             <form
-              className="nav__search-in"
+              className="tl-search__in"
               onSubmit={(e) => {
                 e.preventDefault();
                 const q = new FormData(e.currentTarget).get('q');
                 window.location.href = `/catalogo?q=${encodeURIComponent(String(q || ''))}`;
               }}
             >
-              <IconSearch />
+              <Search />
               <input name="q" placeholder="Buscar bolsas, straps…" autoFocus />
             </form>
           </div>
         )}
-      </header>
-
-      {/* Cajón lateral (móvil) */}
-      <div
-        className={`sheet${open ? ' open' : ''}`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setOpen(false);
-        }}
-      >
-        <div className="sheet__panel">
-          <div className="sheet__head">
-            <Link href="/" onClick={() => setOpen(false)}>
-              <img className="sheet__logo" src="/logo-taluna-dark.png" alt="Taluna MX" />
-            </Link>
-            <button className="icon-btn" aria-label="Cerrar" onClick={() => setOpen(false)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
-                <line x1="5" y1="5" x2="19" y2="19" />
-                <line x1="19" y1="5" x2="5" y2="19" />
-              </svg>
-            </button>
-          </div>
-
-          <nav className="sheet__nav">
-            {links.map((l) => (
-              <Link
-                key={`s-${l.label}`}
-                className={`sheet__link${l.accent ? ' is-accent' : ''}`}
-                href={l.href}
-                onClick={() => setOpen(false)}
-              >
-                {l.label}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 6 15 12 9 18" />
-                </svg>
-              </Link>
-            ))}
-
-            <a
-              className="btn btn--primary btn--block"
-              style={{ marginTop: 26 }}
-              href={waHref}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Pedir por WhatsApp
-            </a>
-
-            <div className="sheet__foot">
-              <a href={contacto?.instagram || site.social.instagram} target="_blank" rel="noopener noreferrer">
-                Instagram
-              </a>
-              <a href={waHref} target="_blank" rel="noopener noreferrer">
-                WhatsApp
-              </a>
-            </div>
-          </nav>
-        </div>
       </div>
+
+      {/* Cajón del menú */}
+      {menu && (
+        <>
+          <div className="tl-scrim" onClick={() => setMenu(false)} aria-hidden="true" />
+          <div className="tl-menu">
+            <div className="tl-menu__head">
+              <img src="/logo-taluna-dark.png" alt="Taluna MX" />
+              <button className="tl-ic" aria-label="Cerrar" onClick={() => setMenu(false)}>
+                <Close />
+              </button>
+            </div>
+
+            <nav className="tl-menu__nav">
+              {[...links, { label: 'Historia', href: '/#historia' }, { label: 'Contacto', href: '/#contacto' }].map(
+                (l) => (
+                  <Link
+                    key={l.label}
+                    href={l.href}
+                    className={`tl-menu__link${l.accent ? ' accent' : ''}`}
+                    onClick={() => setMenu(false)}
+                  >
+                    {l.label}
+                    <Chevron />
+                  </Link>
+                )
+              )}
+
+              <div className="tl-menu__foot">
+                <a href={contacto?.instagram || site.social.instagram} target="_blank" rel="noopener noreferrer">
+                  Instagram
+                </a>
+                <a href={waHref} target="_blank" rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+              </div>
+            </nav>
+          </div>
+        </>
+      )}
     </>
   );
 }

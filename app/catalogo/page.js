@@ -2,7 +2,7 @@ import { getProducts, getCategories } from '@/lib/products';
 import { getSiteContent } from '@/lib/site-content';
 import CatalogGrid from '@/components/CatalogGrid';
 import Pic from '@/components/Pic';
-import RichText, { plainText } from '@/components/blocks/RichText';
+import { plainText } from '@/components/blocks/RichText';
 
 // El catálogo se refresca solo cada minuto (lo que la dueña guarda
 // en el Organizador aparece aquí sin volver a desplegar).
@@ -10,7 +10,7 @@ export const revalidate = 60;
 
 export const metadata = {
   title: 'Catálogo · Taluna',
-  description: 'Explora todas nuestras bolsas y straps artesanales hechos a mano en México.',
+  description: 'Bolsas y straps artesanales de piel, hechos a mano en México.',
 };
 
 export default async function CatalogoPage() {
@@ -20,50 +20,34 @@ export default async function CatalogoPage() {
     getSiteContent(),
   ]);
 
-  // El encabezado lo edita la dueña; {piezas} se cambia por el número real.
   const { eyebrow, title, lead, image, imageMobile } = content.catalogo;
   const leadText = String(lead || '').replace(/\{piezas\}/g, products.length);
-
-  // Si no hay foto de portada guardada, usamos la primera foto real del
-  // catálogo: la página nunca se ve vacía arriba.
   const cover = image || products.find((p) => p.images?.[0]?.url)?.images?.[0]?.url || null;
 
   return (
     <>
       {cover ? (
-        <section className="cover" data-hero>
-          <Pic
-            className="cover__img"
-            src={cover}
-            mobile={image ? imageMobile : ''}
-            alt={plainText(title)}
-            priority
-          />
-          <div className="cover__scrim" />
-          <div className="cover__body">
-            {eyebrow && <span className="kicker">{eyebrow}</span>}
-            <h1 className="cover__title">
-              <RichText text={title} />
-            </h1>
-            {leadText && <p className="cover__lead">{leadText}</p>}
+        <section className="tl-cover" data-hero>
+          <Pic src={cover} mobile={image ? imageMobile : ''} alt={plainText(title)} priority />
+          <div className="tl-cover__scrim" />
+          <div className="tl-cover__b">
+            {eyebrow && <p>{eyebrow}</p>}
+            <h1>{plainText(title)}</h1>
           </div>
         </section>
       ) : (
-        <>
-          <div className="nav-space" />
-          <header className="wrap plainhead">
-            {eyebrow && <span className="kicker">{eyebrow}</span>}
-            <h1 className="sec-title">
-              <RichText text={title} />
-            </h1>
-            {leadText && <p className="lead">{leadText}</p>}
-          </header>
-        </>
+        <section className="tl-plainhead">
+          {eyebrow && <p>{eyebrow}</p>}
+          <h1>{plainText(title)}</h1>
+          {leadText && (
+            <p style={{ marginTop: 12, fontSize: 14, fontWeight: 300, color: 'var(--tl-muted)', letterSpacing: 0, textTransform: 'none' }}>
+              {leadText}
+            </p>
+          )}
+        </section>
       )}
 
-      <div className="wrap section--tight">
-        <CatalogGrid products={products} categories={categories} />
-      </div>
+      <CatalogGrid products={products} categories={categories} />
     </>
   );
 }

@@ -1,18 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useCart } from './CartContext';
 
 // =====================================================================
 //  ARMA TU TALUNA
-//  El configurador del diseño, conectado al catálogo real:
-//    · las BOLSAS y los STRAPS son productos del catálogo;
-//    · los COLORES son las variantes de la bolsa;
-//    · el LARGO son las variantes del strap.
-//  Todo lo que la dueña publique desde el Organizador aparece aquí solo.
-//
-//  compact = la versión corta que va en el inicio.
+//  Porte fiel del ConfiguradorTeaser del diseño, conectado al catálogo:
+//    · BOLSAS y STRAPS son productos del catálogo
+//    · COLORES son las variantes de la bolsa
+//    · LARGO son las variantes del strap
 // =====================================================================
 
 function precio(v, currency = 'MXN') {
@@ -42,22 +38,10 @@ const COLOR_MAP = {
   rosa: '#D8B7AE',
 };
 
-const swatch = (nombre) => COLOR_MAP[(nombre || '').trim().toLowerCase()] || null;
-const disponible = (v) => v.stock === undefined || v.stock === null || v.stock > 0;
+const swatch = (n) => COLOR_MAP[(n || '').trim().toLowerCase()] || null;
+const hayStock = (v) => v.stock === undefined || v.stock === null || v.stock > 0;
 
-function Paso({ n, titulo, nota, children }) {
-  return (
-    <div className="bld__step">
-      <p className="bld__steplabel">
-        <span>{n}</span> {titulo}
-        {nota && <em>{nota}</em>}
-      </p>
-      {children}
-    </div>
-  );
-}
-
-export default function Builder({ bags = [], straps = [], waPhone, compact = false }) {
+export default function Builder({ bags = [], straps = [], waPhone }) {
   const { addItem, isFav, toggleFav, openDrawer } = useCart();
 
   const [bagSlug, setBagSlug] = useState(bags[0]?.slug || null);
@@ -69,16 +53,14 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
   const bag = useMemo(() => bags.find((b) => b.slug === bagSlug) || bags[0], [bags, bagSlug]);
   const strap = useMemo(() => straps.find((s) => s.slug === strapSlug) || null, [straps, strapSlug]);
 
-  const colores = (bag?.variants || []).filter(disponible);
-  const largos = (strap?.variants || []).filter(disponible);
+  const colores = (bag?.variants || []).filter(hayStock);
+  const largos = (strap?.variants || []).filter(hayStock);
 
   const total = (bag?.price || 0) + (strap?.price || 0);
   const listo = Boolean(bag && strap && (!largos.length || largo));
 
   const comboId = `combo-${bag?.slug}-${color || 'x'}-${strap?.slug || 'x'}-${largo || 'x'}`;
-  const comboName = bag
-    ? `${bag.name}${color ? ` · ${color}` : ''}${strap ? ` + ${strap.name}` : ''}`
-    : 'Tu Taluna';
+  const comboName = bag ? `${bag.name}${color ? ` ${color}` : ''}${strap ? ` + ${strap.name}` : ''}` : 'Tu Taluna';
   const detalle = [color, largo].filter(Boolean).join(' · ');
   const guardada = isFav(comboId);
 
@@ -100,50 +82,45 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
 
   if (!bags.length) return null;
 
-  function elegirBolsa(slug) {
-    setBagSlug(slug);
-    setColor(null);
-    setAdded(false);
-  }
-
-  function elegirStrap(slug) {
-    setStrapSlug(slug === strapSlug ? null : slug);
-    setLargo(null);
-    setAdded(false);
-  }
+  const nPaso = (n) => String(n).padStart(2, '0');
+  let paso = 0;
 
   return (
-    <div className={`bld${compact ? ' bld--compact' : ''}`}>
-      {/* Vista previa de la combinación */}
-      <div className="bld__preview">
-        <div className="bld__previewhead">
+    <div>
+      {/* Tu combinación */}
+      <div className="tl-cfg__box">
+        <div className="tl-cfg__boxhead">
           <span>Tu combinación</span>
-          <b>{strap ? precio(total) : `Desde ${precio(bag?.price)}`}</b>
+          <b key={strap ? total : `base-${bag?.slug}`} className="tl-fade-swap">
+            {strap ? precio(total) : `Desde ${precio(bag?.price)}`}
+          </b>
         </div>
 
-        <div className="bld__stage">
+        <div className="tl-cfg__stage">
           {strap && (
-            <div className="bld__strap">
+            <div key={strapSlug} className="tl-cfg__strap tl-swap-strap">
               {strap.images?.[0]?.url ? (
                 <img src={strap.images[0].url} alt={strap.name} />
               ) : (
-                <div className="imgph">{strap.name}</div>
+                <span className="tl-ph">{strap.name}</span>
               )}
             </div>
           )}
 
-          <div className={`bld__bag${strap ? ' is-shifted' : ''}`}>
-            {bag?.images?.[0]?.url ? (
-              <img src={bag.images[0].url} alt={bag.name} />
-            ) : (
-              <div className="imgph">{bag?.name}</div>
-            )}
+          <div className={`tl-cfg__bag${strap ? ' shift' : ''}`}>
+            <div key={`${bag?.slug}-${color || ''}`} className="tl-swap" style={{ width: '100%', height: '100%' }}>
+              {bag?.images?.[0]?.url ? (
+                <img src={bag.images[0].url} alt={bag.name} />
+              ) : (
+                <span className="tl-ph">{bag?.name}</span>
+              )}
+            </div>
           </div>
 
-          <span className="bld__tag">{strap ? strap.name : 'Suma un strap'}</span>
+          <span className="tl-cfg__label">{strap ? strap.name : 'Suma un strap'}</span>
         </div>
 
-        <p className="bld__resumenlinea">
+        <p key={`${bag?.slug}-${color || ''}-${strapSlug || ''}-${largo || ''}`} className="tl-cfg__line tl-fade-swap">
           {bag?.name}
           {color ? ` · ${color}` : ''}
           <span>{strap ? ` · ${strap.name}${largo ? ` · ${largo}` : ''}` : ' · Suma un strap'}</span>
@@ -151,43 +128,49 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
       </div>
 
       {/* 01 · Bolsa */}
-      <Paso n="01" titulo="Elige tu bolsa">
-        <div className="rail bld__rail">
+      <div className="tl-step">
+        <p className="tl-step__t">{nPaso(++paso)} · Elige tu bolsa</p>
+        <div className="tl-picks tl-scroll">
           {bags.map((b) => {
             const on = b.slug === bag?.slug;
             return (
               <button
                 key={b.slug}
-                className={`bld__pick${on ? ' on' : ''}`}
-                onClick={() => elegirBolsa(b.slug)}
+                className={`tl-pick${on ? ' on' : ''}`}
+                onClick={() => {
+                  setBagSlug(b.slug);
+                  setColor(null);
+                  setAdded(false);
+                }}
                 aria-pressed={on}
               >
-                <span className="bld__pickimg">
+                <span className="tl-pick__img">
                   {b.images?.[0]?.url ? (
                     <img src={b.images[0].url} alt="" loading="lazy" />
                   ) : (
-                    <span className="imgph">{b.name}</span>
+                    <span className="tl-ph">{b.name}</span>
                   )}
                 </span>
-                <span className="bld__picklabel">{b.name}</span>
-                <span className="bld__pickprice">{precio(b.price, b.currency)}</span>
+                <span className="tl-pick__n">{b.name}</span>
+                <span className="tl-pick__p">{precio(b.price, b.currency)}</span>
               </button>
             );
           })}
         </div>
-      </Paso>
+      </div>
 
       {/* 02 · Color */}
       {colores.length > 0 && (
-        <Paso n="02" titulo="Elige tu color">
-          <div className="bld__pills">
+        <div className="tl-step">
+          <p className="tl-step__t">{nPaso(++paso)} · Elige tu color</p>
+          <div className="tl-pills">
             {colores.map((v) => {
               const hex = swatch(v.name);
               const on = color === v.name;
               return (
                 <button
                   key={v.sku || v.name}
-                  className={`bld__pill${on ? ' on' : ''}`}
+                  className={`tl-pill${on ? ' on' : ''}`}
                   onClick={() => {
                     setColor(on ? null : v.name);
                     setAdded(false);
@@ -200,54 +183,58 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
               );
             })}
           </div>
-        </Paso>
+        </div>
       )}
 
       {/* 03 · Strap */}
-      <Paso
-        n={colores.length ? '03' : '02'}
-        titulo="Elige tu strap"
-        nota={bag ? `compatibles con ${bag.name}` : null}
-      >
+      <div className="tl-step">
+        <p className="tl-step__t">
+          {nPaso(++paso)} · Elige tu strap {bag && <em>compatibles con {bag.name}</em>}
+        </p>
         {straps.length ? (
-          <div className="rail bld__rail bld__rail--straps">
+          <div className="tl-picks tl-scroll">
             {straps.map((s) => {
               const on = s.slug === strap?.slug;
               return (
                 <button
                   key={s.slug}
-                  className={`bld__pick bld__pick--strap${on ? ' on' : ''}`}
-                  onClick={() => elegirStrap(s.slug)}
+                  className={`tl-pick tl-pick--strap${on ? ' on' : ''}`}
+                  onClick={() => {
+                    setStrapSlug(on ? null : s.slug);
+                    setLargo(null);
+                    setAdded(false);
+                  }}
                   aria-pressed={on}
                 >
-                  <span className="bld__pickimg">
+                  <span className="tl-pick__img">
                     {s.images?.[0]?.url ? (
                       <img src={s.images[0].url} alt="" loading="lazy" />
                     ) : (
-                      <span className="imgph">{s.name}</span>
+                      <span className="tl-ph">{s.name}</span>
                     )}
                   </span>
-                  <span className="bld__picklabel">{s.name}</span>
-                  <span className="bld__pickprice">+{precio(s.price, s.currency)}</span>
+                  <span className="tl-pick__n">{s.name}</span>
+                  <span className="tl-pick__p">+{precio(s.price, s.currency)}</span>
                 </button>
               );
             })}
           </div>
         ) : (
-          <p className="lead">Todavía no hay straps publicados en el catálogo.</p>
+          <p className="tl-cfg__line">Todavía no hay straps publicados en el catálogo.</p>
         )}
-      </Paso>
+      </div>
 
       {/* 04 · Largo */}
       {strap && largos.length > 0 && (
-        <Paso n={colores.length ? '04' : '03'} titulo="Largo del strap">
-          <div className="bld__pills">
+        <div className="tl-step">
+          <p className="tl-step__t">{nPaso(++paso)} · Largo del strap</p>
+          <div className="tl-pills">
             {largos.map((v) => {
               const on = largo === v.name;
               return (
                 <button
                   key={v.sku || v.name}
-                  className={`bld__pill${on ? ' on' : ''}`}
+                  className={`tl-pill${on ? ' on' : ''}`}
                   onClick={() => {
                     setLargo(on ? null : v.name);
                     setAdded(false);
@@ -259,13 +246,13 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
               );
             })}
           </div>
-        </Paso>
+        </div>
       )}
 
       {/* Resumen */}
-      <div className="bld__resumen">
-        <p className="bld__steplabel"><span>Tu resumen</span></p>
-        <div className="bld__resumengrid">
+      <div className="tl-sum">
+        <p className="tl-sum__t">Tu resumen</p>
+        <div className="tl-sum__grid">
           {[
             ['Bolsa', bag?.name, false],
             ['Color', color || (colores.length ? 'Elige uno' : '—'), !color && colores.length > 0],
@@ -279,54 +266,46 @@ export default function Builder({ bags = [], straps = [], waPhone, compact = fal
           ))}
         </div>
 
-        <div className="bld__total">
+        <div className="tl-sum__rule" />
+
+        <div className="tl-sum__total">
           <span>Total</span>
           <b>{precio(total)}</b>
         </div>
-        <p className="bld__nota">Envío por cotizar · Hecho a mano en México</p>
+        <p className="tl-sum__nota">Envío por cotizar · Hecho a mano en México</p>
       </div>
 
       {/* Acciones */}
-      <div className="bld__acciones">
+      <div className="tl-cfg__acts">
         {listo ? (
           <button
-            className="btn btn--primary btn--block"
+            className="tl-btn tl-btn--dark tl-btn--block"
             onClick={() => {
               addItem(linea);
               setAdded(true);
               openDrawer('cart');
             }}
           >
-            {added ? 'Agregada ✓' : 'Agregar a la bolsa'}
+            {added ? 'Agregado ✓' : 'Agregar a carrito'}
           </button>
         ) : (
-          <button className="btn btn--block" disabled>
+          <span className="tl-btn tl-btn--mute tl-btn--block">
             {!strap ? 'Elige un strap' : 'Elige el largo'}
-          </button>
+          </span>
         )}
 
-        <div className="bld__acciones2">
-          <button
-            className="bld__save"
-            onClick={() => strap && toggleFav(linea)}
-            disabled={!strap}
-          >
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'center' }}>
+          <button className="tl-save" onClick={() => strap && toggleFav(linea)} disabled={!strap}>
             <svg viewBox="0 0 24 24" fill={guardada ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 20.5C12 20.5 3.5 15 3.5 8.8a4.3 4.3 0 0 1 8.5-1 4.3 4.3 0 0 1 8.5 1C20.5 15 12 20.5 12 20.5z" />
             </svg>
             {guardada ? 'Guardada' : 'Guardar combinación'}
           </button>
 
-          <a className="bld__save" href={waHref} target="_blank" rel="noopener noreferrer">
+          <a className="tl-save" href={waHref} target="_blank" rel="noopener noreferrer">
             Preguntar por WhatsApp
           </a>
         </div>
-
-        {compact && (
-          <Link href="/arma-tu-taluna" className="ulink" style={{ marginTop: 6 }}>
-            Abrir el configurador completo
-          </Link>
-        )}
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import Builder from './Builder';
 
-// Envoltura del configurador para el inicio: reparte el catálogo entre
-// bolsas y straps y lo entrega ya listo al componente de cliente.
-export default function BuilderTeaser({ products = [], categories = [], contacto, compact = true }) {
+// Reparte el catálogo entre bolsas (1ª categoría) y straps (2ª) y se lo
+// entrega al configurador.
+export default function BuilderTeaser({ products = [], categories = [], contacto }) {
   const bolsasSlug = categories[0]?.slug;
   const strapsSlug = categories[1]?.slug;
 
@@ -11,7 +11,5 @@ export default function BuilderTeaser({ products = [], categories = [], contacto
 
   if (!bags.length) return null;
 
-  return (
-    <Builder bags={bags} straps={straps} waPhone={contacto?.whatsapp} compact={compact} />
-  );
+  return <Builder bags={bags} straps={straps} waPhone={contacto?.whatsapp} />;
 }

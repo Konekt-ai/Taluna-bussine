@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 
 // =====================================================================
 //  AVISO DE NOVEDADES
-//  Aparece una sola vez por visita, unos segundos después de entrar (no
-//  estorba la carga). No hay lista de correo todavía, así que el alta se
-//  hace por WhatsApp, que es por donde atiende Taluna.
+//  Porte fiel de NewsletterPopup del diseño: sale a los 4 segundos, una
+//  sola vez por visita. Como no hay lista de correo, el alta se hace por
+//  WhatsApp, que es por donde atiende Taluna.
 // =====================================================================
 
-const CLAVE = 'taluna-newsletter';
+const CLAVE = 'tl-newsletter';
 
 export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
       } catch {
         /* noop */
       }
-    }, 6000);
+    }, 4000);
     return () => clearTimeout(t);
   }, []);
 
@@ -43,8 +43,7 @@ export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
 
   if (!open) return null;
 
-  function enviar(e) {
-    e.preventDefault();
+  function enviar() {
     if (!email.includes('@')) {
       setError(true);
       return;
@@ -58,13 +57,13 @@ export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
       '_blank',
       'noopener,noreferrer'
     );
-    setTimeout(() => setOpen(false), 2400);
+    setTimeout(() => setOpen(false), 2600);
   }
 
   return (
-    <div className="np" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="Novedades de Taluna">
-      <div className="np__card" onClick={(e) => e.stopPropagation()}>
-        <button className="np__x" onClick={() => setOpen(false)} aria-label="Cerrar">
+    <div className="tl-np" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="Novedades de Taluna">
+      <div className="tl-np__card" onClick={(e) => e.stopPropagation()}>
+        <button className="tl-np__x" onClick={() => setOpen(false)} aria-label="Cerrar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <line x1="5" y1="5" x2="19" y2="19" />
             <line x1="19" y1="5" x2="5" y2="19" />
@@ -72,14 +71,14 @@ export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
         </button>
 
         {image && (
-          <div className="np__img">
-            <img src={image} alt="" />
+          <div className="tl-np__img">
+            <img src={image} alt="Colección Taluna MX" />
           </div>
         )}
 
         {listo ? (
-          <div className="np__body center">
-            <span className="np__ok">
+          <div className="tl-np__b">
+            <span className="tl-np__ok">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
@@ -88,25 +87,22 @@ export default function NewsletterPopup({ image, waPhone, texto, titulo }) {
             <p>Ya eres parte de Taluna. Pronto sabrás de nosotras.</p>
           </div>
         ) : (
-          <div className="np__body">
-            <img className="np__logo" src="/logo-taluna-dark.png" alt="Taluna MX" />
-            <p className="np__lead">{texto}</p>
-            <p className="np__strong">{titulo}</p>
-
-            <form onSubmit={enviar}>
-              <input
-                type="email"
-                className="inp np__input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Déjanos tu correo"
-                aria-label="Tu correo"
-                style={error ? { borderColor: '#B5544E' } : undefined}
-              />
-              <button type="submit" className="btn btn--primary btn--block">
-                Suscribirme
-              </button>
-            </form>
+          <div className="tl-np__b">
+            <img className="logo" src="/logo-taluna-dark.png" alt="Taluna MX" />
+            <p>{texto}</p>
+            <p className="strong">{titulo}</p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && enviar()}
+              placeholder="Déjanos tu correo"
+              aria-label="Tu correo"
+              style={error ? { borderColor: '#B5544E' } : undefined}
+            />
+            <button className="sub" onClick={enviar}>
+              Suscribirme
+            </button>
           </div>
         )}
       </div>
