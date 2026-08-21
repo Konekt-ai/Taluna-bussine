@@ -25,7 +25,7 @@ export type StoreItem = {
 
 const FAV_KEY = "taluna_favs_v1";
 const CART_KEY = "taluna_cart_v1";
-export const WA_PHONE = "5215555555555";
+export const WA_PHONE = "5213331292868";
 
 function read(key: string): StoreItem[] {
   if (typeof window === "undefined") return [];
